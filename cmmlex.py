@@ -1,4 +1,5 @@
 import ply.lex as lex
+from types import Node,BinOp
 
 # List of keywords
 keywords = {
@@ -113,8 +114,14 @@ while True:
 # Start the parsing
 import ply.yacc as yacc
 
-def p_prog(p):
-    pass
+def p_prog_dcl(p):
+    '''prog : dcl SEMICOLON prog
+            | dcl SEMICOLON empty'''
+    p[0] = Prog('prog', [p[1], p[3]], None)
+def p_prog_func(p):
+    '''prog : dcl func prog
+            | dcl func empty'''
+    p[0] = Prog('prog', [p[1]], None)
 
 def p_dcl(p):
     pass
@@ -141,12 +148,26 @@ def p_expr(p):
     pass
 
 def p_binop(p):
-    pass
+    '''binop : PLUS
+             | MINUS
+             | TIMES
+             | DIVIDE'''
+    p[0] = BinOp('binop', None, p[1])
 
 def p_relop(p):
-    pass
+    '''relop : EQUAL
+             | NOTEQUAL
+             | LESSEQUAL
+             | LESS
+             | MOREEQUAL
+             | MORE'''
+    p[0] = RelOp('relop', None, p[1])
 
 def p_logical_op(p):
+    '''logical_op : AND
+                  | OR'''
+    p[0] = LogicalOp('logical_op', None, p[1])
+
+def p_empty(p):
+    '''empty :'''
     pass
-
-
