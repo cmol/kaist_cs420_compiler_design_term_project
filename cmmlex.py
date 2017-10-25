@@ -113,4 +113,40 @@ while True:
 # Start the parsing
 import ply.yacc as yacc
 
+def p_prog(p):
+    pass
+
+def p_dcl(p):
+    pass
+
+def p_var_decl(p):
+    pass
+
+def p_typy(p):
+    pass
+
+def p_param_types(p):
+    pass
+
+def p_func(p):
+    pass
+
+def p_stmt(p):
+    pass
+
+def p_assg(p):
+    pass
+
+def p_expr(p):
+    pass
+
+def p_binop(p):
+    pass
+
+def p_relop(p):
+    pass
+
+def p_logical_op(p):
+    pass
+
 
