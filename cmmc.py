@@ -115,25 +115,66 @@ while True:
 import ply.yacc as yacc
 
 def p_prog_dcl(p):
-    '''prog : dcl SEMICOLON prog
-            | dcl SEMICOLON empty'''
-    p[0] = Prog('prog', [p[1], p[3]], None)
-def p_prog_func(p):
-    '''prog : dcl func prog
-            | dcl func empty'''
-    p[0] = Prog('prog', [p[1]], None)
+    '''prog : prog dcl SEMICOLON
+            | prog func
+            |'''
+    p[0] = Prog('prog', [p[1], p[2]], None)
 
-def p_dcl(p):
-    pass
+
+def p_dcl_first(p): # dcl : type var_decl dcl_prime
+    '''dcl : type var_decl decl_p
+           | dcl_extern VOID ID LPAREN param_types RPAREN dcp_pp
+           | dcl_extern type ID LPAREN param_types RPAREN dcp_pp'''
+    if(len(p) > 4):
+        p[0] = Dcl('dcl', [(p[4], p[3], p[6] ), *p[8]] ,p[1])
+    else
+        p[0] = Dcl('dcl', [ p[1], [p[2], *p[3]] ], None)
+def p_dcl_p(p):
+    '''dcl_p : COMMA var_decl dcl_p
+             |'''
+    if(len(p[0]) > 1):
+        p[0] = [p[2], *p[3]]
+    else:
+        pass
+def p_dcl_pp(p):
+    ''' dcl_pp : COMMA ID LPAREN param_types RPAREN dcl_pp
+               |'''
+    if(len(p[0]) > 1):
+        p[0] = [(p[2], p[4]), *p[6]]
+    else:
+        pass
+
 
 def p_var_decl(p):
-    pass
+    '''var_decl : ID
+                | ID LSQUARE INTCONT RSQUARE'''
+    p[0] = VarDecl('var_decl', None, p[1])
+    if(len(p) > 2):
+        p[0].num_elements = int(p[3])
 
 def p_typy(p):
-    pass
+    '''type : CHARCON
+            | INTCON'''
+    p[0] = Type('type', None, p[1])
 
 def p_param_types(p):
-    pass
+    '''param_types : VOID
+                   | type ID param_types_array param_types_more'''
+    if(len(p) > 2):
+        p[0] = ParamTypes('param_types', [(p[2], p[1], p[3]), *p[4]])
+    else:
+        p[0] = ParamTypes('param_types', None, p[1])
+def p_param_types_array(p):
+    '''param_types_array : LPAREN RPAREN
+                         |'''
+    if(len(p) > 2):
+        p[0] = "array"
+    else:
+        p[0] = None
+def p_param_types_more(p):
+    '''param_types_more : COMMA type ID param_types_array param_types_more
+                        |'''
+    p[0] = [(p[4], p[3], p[5]), *p[6]
 
 def p_func(p):
     pass
