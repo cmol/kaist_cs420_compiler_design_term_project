@@ -174,7 +174,7 @@ def p_param_types_array(p):
 def p_param_types_more(p):
     '''param_types_more : COMMA type ID param_types_array param_types_more
                         |'''
-    p[0] = [(p[4], p[3], p[5]), *p[6]
+    p[0] = [(p[4], p[3], p[5]), *p[6]]
 
 def p_func(p):
     pass
