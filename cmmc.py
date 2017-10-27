@@ -183,7 +183,15 @@ def p_stmt(p):
     pass
 
 def p_assg(p):
-    pass
+    '''assg : ID assg_p ASSIGNMENT expr'''
+    p[0] = Assg('Assg', p[4], (p[1], p[2]) )
+def p_assg_p(p):
+    '''assg : LSQUARE expr RSQUARE
+            |'''
+    if(len(p) > 2):
+        p[0] = p[2]
+    else:
+        p[0] = None
 
 def p_expr(p):
     pass
