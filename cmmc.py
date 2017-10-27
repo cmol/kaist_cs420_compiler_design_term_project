@@ -193,8 +193,38 @@ def p_assg_p(p):
     else:
         p[0] = None
 
-def p_expr(p):
-    pass
+def p_expr_single(p):
+    '''expr : MINUS expr
+            | NOT expr'''
+    p[0] = Expr('expr', p[2], p[1])
+def p_expr_multi(p):
+    '''expr : expr binop expr
+            | expr relop expr
+            | expr logical_op expr'''
+    p[0] = Expr('expr', [p[1], p[3]], p[2])
+def p_expr_terminals(p):
+    '''expr : INTCON
+            | CHARCON
+            | STRINGCON'''
+    p[0] = Expr('expr', None, p[1])
+def p_expr_sub(p):
+    '''expr : LPAREN expr RPAREN'''
+    p[0] = p[2]
+def p_expr_id(p):
+    '''expr : ID expr_p'''
+    p[0] = Expr('expr', p[2], p[1])
+def p_expr_p(p):
+    '''expr_p : LPAREN expr_pp RPAREN
+              | LSQUARE expr RSQUARE'''
+    p[0] = p[2]
+def p_expr_pp(p):
+    '''expr_pp : expr expr_ppp
+               |'''
+    p[0] = [p[1], *p[2]]
+def p_expr_p(p):
+    '''expr_ppp : COMMA expr expr_ppp
+                | '''
+    p[0] = [p[2], *p[3]]
 
 def p_binop(p):
     '''binop : PLUS
