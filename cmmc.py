@@ -179,8 +179,46 @@ def p_param_types_more(p):
 def p_func(p):
     pass
 
-def p_stmt(p):
-    pass
+def p_stmt_if(p):
+    '''stmt : IF LPAREN expr RPAREN stmt stmt_else'''
+    pass #TODO
+def p_stmt_else(p):
+    '''stmt_else : ELSE stmt
+                 |'''
+    pass #TODO
+def p_stmt_while(p):
+    '''stmt : WHILE LPAREN expr RPAREN stmt'''
+    pass #TODO
+def p_stmt_for(p):
+    '''stmt : FOR LPAREN stmt_opt_assg SEMICOLON stmt_opt_expr SEMICOLON stmt_opt_assg RPAREN stmt'''
+    pass #TODO
+def p_stmt_opt_assg(p):
+    '''stmt_opt_assg : assg
+                     |'''
+    pass #TODO
+def p_stmt_opt_expr(p):
+    '''stmt_opt_expr : expr
+                     |'''
+    pass #TODO
+def p_stmt_return(p):
+    '''stmt : RETURN stmt_opt_expr SEMICOLON'''
+    pass #TODO
+def p_stmt_assg(p):
+    '''stmt : assg SEMICOLON'''
+    pass #TODO
+def p_stmt_id(p):
+    '''stmt : ID LPAREN expr_pp RPAREN SEMICOLON'''
+    pass #TODO
+def p_stmt_enclose(p):
+    '''stmt : LCURLY stmt_repeat RCURLY'''
+    pass #TODO
+def p_stmt_repeat(p):
+    '''stmt_repeat : stmt stmt_repeat
+                   |'''
+    pass #TODO
+def p_stmt_end(p):
+    '''stmt : SEMICOLON'''
+    pass #TODO
 
 def p_assg(p):
     '''assg : ID assg_p ASSIGNMENT expr'''
