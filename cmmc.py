@@ -162,8 +162,8 @@ def p_typy(p):
             | INTCON'''
     p[0] = Type('type', None, p[1])
 
-# parm_types 	: 	void
-# 				|	type id [ '[' ']' ] { ',' type id [ '[' ']' ] }
+# parm_types : void
+#            | type id [ '[' ']' ] { ',' type id [ '[' ']' ] }
 def p_param_types(p):
     '''param_types : VOID
                    | type ID param_types_array param_types_more'''
@@ -183,19 +183,19 @@ def p_param_types_more(p):
                         |'''
     p[0] = [(p[4], p[3], p[5]), *p[6]]
 
-# func 	: 	type id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
-#	  	| 	void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
+# func : type id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
+#      | void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 def p_func(p):
     pass
 
-# stmt 	: 	if '(' expr ')' stmt [ else stmt ]
-#	 	| 	while '(' expr ')' stmt
-#	 	| 	for '(' [ assg ] ';' [ expr ] ';' [ assg ] ')' stmt
-#	 	| 	return [ expr ] ';'
-#	 	| 	assg ';'
-#	 	| 	id '(' [expr { ',' expr } ] ')' ';'
-#	 	| 	'{' { stmt } '}'
-#	 	| 	';'
+# stmt : if '(' expr ')' stmt [ else stmt ]
+#      | while '(' expr ')' stmt
+#      | for '(' [ assg ] ';' [ expr ] ';' [ assg ] ')' stmt
+#      | return [ expr ] ';'
+#      | assg ';'
+#      | id '(' [expr { ',' expr } ] ')' ';'
+#      | '{' { stmt } '}'
+#      | ';'
 def p_stmt_if(p):
     '''stmt : IF LPAREN expr RPAREN stmt stmt_else'''
     pass #TODO
@@ -237,7 +237,7 @@ def p_stmt_end(p):
     '''stmt : SEMICOLON'''
     pass #TODO
 
-# assg 	: 	id [ '[' expr ']' ] = expr
+# assg : id [ '[' expr ']' ] = expr
 def p_assg(p):
     '''assg : ID assg_p ASSIGNMENT expr'''
     p[0] = Assg('Assg', p[4], (p[1], p[2]) )
@@ -249,16 +249,16 @@ def p_assg_p(p):
     else:
         p[0] = None
 
-# expr 	: 	'–' expr
-#	 	| 	'!' expr
-#	 	| 	expr binop expr
-#	 	| 	expr relop expr
-#	 	| 	expr logical_op expr
-#	 	| 	id [ '(' [expr { ',' expr } ] ')' | '[' expr ']' ]
-#	 	| 	'(' expr ')'
-#	 	| 	intcon
-#	  	|	charcon
-#	  	|	stringcon
+# expr : '–' expr
+#      | '!' expr
+#      | expr binop expr
+#      | expr relop expr
+#      | expr logical_op expr
+#      | id [ '(' [expr { ',' expr } ] ')' | '[' expr ']' ]
+#      | '(' expr ')'
+#      | intcon
+#      | charcon
+#      | stringcon
 def p_expr_single(p):
     '''expr : MINUS expr
             | NOT expr'''
@@ -292,10 +292,10 @@ def p_expr_p(p):
                 | '''
     p[0] = [p[2], *p[3]]
 
-# binop 	: 	+
-#		 	|	–
-#		 	|	*
-#		 	|	/
+# binop : +
+#       |–
+#       |*
+#       |/
 def p_binop(p):
     '''binop : PLUS
              | MINUS
@@ -303,12 +303,12 @@ def p_binop(p):
              | DIVIDE'''
     p[0] = BinOp('binop', None, p[1])
 
-# relop 	: 	==
-#		 	|	!=
-#		 	|	<=
-#		 	|	<
-#		 	|	>=
-#		 	|	>
+# relop : ==
+#       | !=
+#       | <=
+#       | <
+#       | >=
+#       | >
 def p_relop(p):
     '''relop : EQUAL
              | NOTEQUAL
@@ -318,14 +318,14 @@ def p_relop(p):
              | MORE'''
     p[0] = RelOp('relop', None, p[1])
 
-# logical_op 	: 	&&
-#			 	|	||
+# logical_op : &&
+#            | ||
 def p_logical_op(p):
     '''logical_op : AND
                   | OR'''
     p[0] = LogicalOp('logical_op', None, p[1])
 
-# empty : 
+# empty :
 def p_empty(p):
     '''empty :'''
     pass
