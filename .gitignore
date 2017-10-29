@@ -1,3 +1,7 @@
+# Specific things for Claus
+report_hw02/*
+report_hw03/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
