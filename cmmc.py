@@ -186,7 +186,20 @@ def p_param_types_more(p):
 # func : type id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 #      | void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 def p_func(p):
-    pass
+    '''func : func_type ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat SEMICOLON'''
+    p[0] = Func('func', (p[7], p[8]), (p[1], p[2], p[4]))
+def p_func_type(p):
+    '''func_type : type
+                 | VOID'''
+    p[0] = p[1]
+def p_func_dcl(p):
+    '''func_dcl : type var_decl func_dcl_p SEMICOLON
+                |'''
+    p[0] = (p[1], [p[2], *p[3]])
+def p_func_dcl_p(p):
+    '''func_dcl_p : COMMA var_decl func_dcl_p
+                  |'''
+    p[0] = [p[2], *p[3]]
 
 # stmt : if '(' expr ')' stmt [ else stmt ]
 #      | while '(' expr ')' stmt
