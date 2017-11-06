@@ -198,44 +198,53 @@ def p_func(p):
 #      | ';'
 def p_stmt_if(p):
     '''stmt : IF LPAREN expr RPAREN stmt stmt_else'''
-    pass #TODO
+    p[0] = IfStmt('ifstmt', [p[5],p[6]], p[3])
 def p_stmt_else(p):
     '''stmt_else : ELSE stmt
                  |'''
-    pass #TODO
+    if(len(p) > 2):
+        p[0] = p[2]
+    else:
+        p[0] = None
 def p_stmt_while(p):
     '''stmt : WHILE LPAREN expr RPAREN stmt'''
-    pass #TODO
+    p[0] = WhileStmt('whilestmt', p[5], p[3])
 def p_stmt_for(p):
     '''stmt : FOR LPAREN stmt_opt_assg SEMICOLON stmt_opt_expr SEMICOLON stmt_opt_assg RPAREN stmt'''
-    pass #TODO
+    p[0] = ForStmt('forstmt', p[9] ,[p[3],p[5],p[7]])
 def p_stmt_opt_assg(p):
     '''stmt_opt_assg : assg
                      |'''
-    pass #TODO
+    if(len(p) > 1):
+        p[0] = p[1]
+    else:
+        p[0]
 def p_stmt_opt_expr(p):
     '''stmt_opt_expr : expr
                      |'''
-    pass #TODO
+    if(len(p) > 1):
+        p[0] = p[1]
+    else:
+        p[0]
 def p_stmt_return(p):
     '''stmt : RETURN stmt_opt_expr SEMICOLON'''
-    pass #TODO
+    p[0] = ReturnStmt('returnstmt', None, p[2])
 def p_stmt_assg(p):
     '''stmt : assg SEMICOLON'''
-    pass #TODO
+    p[0] = Assg('assg',None, p[1])
 def p_stmt_id(p):
     '''stmt : ID LPAREN expr_pp RPAREN SEMICOLON'''
-    pass #TODO
+    p[0] = CallStmt('callstmt', p[3], p[1])
 def p_stmt_enclose(p):
     '''stmt : LCURLY stmt_repeat RCURLY'''
-    pass #TODO
+    p[0] = StmtEnclose('stmtenclose', p[2], None)
 def p_stmt_repeat(p):
     '''stmt_repeat : stmt stmt_repeat
                    |'''
-    pass #TODO
+    p[0] = [p[1], *p[2]]
 def p_stmt_end(p):
     '''stmt : SEMICOLON'''
-    pass #TODO
+    p[0] = None
 
 # assg : id [ '[' expr ']' ] = expr
 def p_assg(p):
