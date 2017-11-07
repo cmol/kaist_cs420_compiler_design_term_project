@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
 import ply.lex as lex
-from types import Node,BinOp
+import types
 
 # List of keywords
 keywords = {
@@ -125,15 +126,22 @@ def p_prog(p):
 #     | [ extern ] type id '(' param_typesm_types ')' { ',' id '(' parm_types ')' }
 #     | [ extern ] void id '(' param_typesm_typesarm_types ')' { ',' id '(' parm_types ')' }
 def p_dcl_first(p): # dcl : type var_decl dcl_prime
-    '''dcl : type var_decl decl_p
-           | dcl_extern VOID ID LPAREN param_types RPAREN dcp_pp
-           | dcl_extern type ID LPAREN param_types RPAREN dcp_pp'''
+    '''dcl : type var_decl dcl_p
+           | dcl_extern VOID ID LPAREN param_types RPAREN dcl_p
+           | dcl_extern type ID LPAREN param_types RPAREN dcl_p'''
     if(len(p) > 4):
         p[0] = Dcl('dcl', [(p[4], p[3], p[6] ), *p[8]] ,p[1])
-    else
+    else:
         p[0] = Dcl('dcl', [ p[1], [p[2], *p[3]] ], None)
+def p_dcl_extern(p):
+    '''dcl_extern : EXTERN
+                  |'''
+    if(len(p) > 1):
+        p[0] = p[1]
+    else:
+        p[0] = None
 def p_dcl_p(p):
-    '''dcl_p : COMMA var_decl dcl_p
+    '''dcl_p : COMMA var_decl dcl_pp
              |'''
     if(len(p[0]) > 1):
         p[0] = [p[2], *p[3]]
@@ -150,7 +158,7 @@ def p_dcl_pp(p):
 # var_decl : id [ '[' intcon ']' ]
 def p_var_decl(p):
     '''var_decl : ID
-                | ID LSQUARE INTCONT RSQUARE'''
+                | ID LSQUARE INTCON RSQUARE'''
     p[0] = VarDecl('var_decl', None, p[1])
     if(len(p) > 2):
         p[0].num_elements = int(p[3])
@@ -158,8 +166,8 @@ def p_var_decl(p):
 # type : char
 #      | int
 def p_typy(p):
-    '''type : CHARCON
-            | INTCON'''
+    '''type : CHAR
+            | INT'''
     p[0] = Type('type', None, p[1])
 
 # parm_types : void
@@ -264,7 +272,7 @@ def p_assg(p):
     '''assg : ID assg_p ASSIGNMENT expr'''
     p[0] = Assg('Assg', p[4], (p[1], p[2]) )
 def p_assg_p(p):
-    '''assg : LSQUARE expr RSQUARE
+    '''assg_p : LSQUARE expr RSQUARE
             |'''
     if(len(p) > 2):
         p[0] = p[2]
@@ -309,7 +317,7 @@ def p_expr_pp(p):
     '''expr_pp : expr expr_ppp
                |'''
     p[0] = [p[1], *p[2]]
-def p_expr_p(p):
+def p_expr_ppp(p):
     '''expr_ppp : COMMA expr expr_ppp
                 | '''
     p[0] = [p[2], *p[3]]
@@ -347,7 +355,23 @@ def p_logical_op(p):
                   | OR'''
     p[0] = LogicalOp('logical_op', None, p[1])
 
-# empty :
-def p_empty(p):
-    '''empty :'''
-    pass
+# Define precedence
+precedence = (
+        ('left', 'AND', 'OR'),
+        ('left', 'EQUAL', 'NOTEQUAL'),
+        ('left', 'LESS', 'MORE', 'LESSEQUAL', 'MOREEQUAL'),
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'TIMES', 'DIVIDE')
+    )
+
+# Build the parser
+parser = yacc.yacc()
+
+while True:
+   try:
+       s = input('calc > ')
+   except EOFError:
+       break
+   if not s: continue
+   result = parser.parse(s)
+   print(result)
