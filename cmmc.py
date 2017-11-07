@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-import ply.lex as lex
-import types
+#import ply.lex as lex
+from parser_types import *
+
+Prog(None,None,None)
 
 # List of keywords
 keywords = {
