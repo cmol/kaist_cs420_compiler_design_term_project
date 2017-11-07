@@ -157,8 +157,9 @@ def p_dcl_pp(p):
 
 # var_decl : id [ '[' intcon ']' ]
 def p_var_decl(p):
-    '''var_decl : ID var_decl_p'''
-    p[0] = VarDecl('var_decl', None, (p[1], p[2]))
+    '''var_decl : ID'''
+    '''var_decl : ID LSQUARE INTCON RSQUARE'''
+    p[0] = VarDecl('var_decl', None, (p[1], p[3] if len(p) > 2 else None))
 def p_var_decl_p(p):
     '''var_decl_p : LSQUARE INTCON RSQUARE
                   |'''
