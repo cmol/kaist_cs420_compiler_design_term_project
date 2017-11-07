@@ -222,8 +222,9 @@ def p_func_dcl_p(p):
 #      | '{' { stmt } '}'
 #      | ';'
 def p_stmt_if(p):
-    '''stmt : IF LPAREN expr RPAREN stmt stmt_else'''
-    p[0] = IfStmt('ifstmt', [p[5],p[6]], p[3])
+    '''stmt : IF LPAREN expr RPAREN stmt'''
+    '''     | IF LPAREN expr RPAREN stmt ELSE stmt'''
+    p[0] = IfStmt('ifstmt', [p[5],p[7]], p[3])
 def p_stmt_else(p):
     '''stmt_else : ELSE stmt
                  |'''
@@ -298,9 +299,18 @@ def p_expr_single(p):
             | NOT expr'''
     p[0] = Expr('expr', p[2], p[1])
 def p_expr_multi(p):
-    '''expr : expr binop expr
-            | expr relop expr
-            | expr logical_op expr'''
+    '''expr : expr PLUS expr
+            | expr MINUS expr
+            | expr TIMES expr
+            | expr DIVIDE expr
+            | expr EQUAL expr
+            | expr NOTEQUAL expr
+            | expr LESSEQUAL expr
+            | expr LESS expr
+            | expr MOREEQUAL expr
+            | expr MORE expr
+            | expr AND expr
+            | expr OR expr'''
     p[0] = Expr('expr', [p[1], p[3]], p[2])
 def p_expr_terminals(p):
     '''expr : INTCON
@@ -330,12 +340,12 @@ def p_expr_ppp(p):
 #       |–
 #       |*
 #       |/
-def p_binop(p):
-    '''binop : PLUS
-             | MINUS
-             | TIMES
-             | DIVIDE'''
-    p[0] = BinOp('binop', None, p[1])
+# def p_binop(p):
+#    '''binop : PLUS
+#             | MINUS
+#             | TIMES
+#             | DIVIDE'''
+#    p[0] = BinOp('binop', None, p[1])
 
 # relop : ==
 #       | !=
@@ -343,21 +353,21 @@ def p_binop(p):
 #       | <
 #       | >=
 #       | >
-def p_relop(p):
-    '''relop : EQUAL
-             | NOTEQUAL
-             | LESSEQUAL
-             | LESS
-             | MOREEQUAL
-             | MORE'''
-    p[0] = RelOp('relop', None, p[1])
+# def p_relop(p):
+#    '''relop : EQUAL
+#             | NOTEQUAL
+#             | LESSEQUAL
+#             | LESS
+#             | MOREEQUAL
+#             | MORE'''
+#    p[0] = RelOp('relop', None, p[1])
 
 # logical_op : &&
 #            | ||
-def p_logical_op(p):
-    '''logical_op : AND
-                  | OR'''
-    p[0] = LogicalOp('logical_op', None, p[1])
+# def p_logical_op(p):
+#    '''logical_op : AND
+#                  | OR'''
+#    p[0] = LogicalOp('logical_op', None, p[1])
 
 # Define precedence
 precedence = (
