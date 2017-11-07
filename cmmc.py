@@ -47,30 +47,30 @@ tokens = [
 ] + list(keywords.values())
 
 # Regex for simpler tokens
-t_PLUS      = r'\+'
-t_MINUS     = r'-'
-t_TIMES     = r'\*'
-t_DIVIDE    = r'/'
-t_LPAREN    = r'\('
-t_RPAREN    = r'\)'
-t_LCURLY    = r'\{'
-t_RCURLY    = r'\}'
-t_LSQUARE   = r'\['
-t_RSQUARE   = r'\]'
-t_COMMA     = r'\,'
-t_SEMICOLON = r';'
-t_EQUAL     = r'=='
-t_NOT       = r'\!'
-t_NOTEQUAL  = r'\!='
-t_LESSEQUAL = r'<='
-t_LESS      = r'<'
-t_MOREEQUAL = r'>='
-t_MORE      = r'>'
-t_AND       = r'&&'
-t_OR        = r'\|\|'
-t_COMMENT   = r'\/\*(\w|\W)*\*\/'
-t_CHARCON   = r'\'([ -~] | \n | \0)\''
-t_STRINGCON = r'\"([ -~] | \0)*\"'
+t_PLUS       = r'\+'
+t_MINUS      = r'-'
+t_TIMES      = r'\*'
+t_DIVIDE     = r'/'
+t_LPAREN     = r'\('
+t_RPAREN     = r'\)'
+t_LCURLY     = r'\{'
+t_RCURLY     = r'\}'
+t_LSQUARE    = r'\['
+t_RSQUARE    = r'\]'
+t_COMMA      = r'\,'
+t_SEMICOLON  = r';'
+t_EQUAL      = r'== '
+t_NOT        = r'\!'
+t_NOTEQUAL   = r'\!='
+t_LESSEQUAL  = r'<= '
+t_LESS       = r'<'
+t_MOREEQUAL  = r'>='
+t_MORE       = r'>'
+t_AND        = r'&&'
+t_OR         = r'\|\|'
+t_COMMENT    = r'\/\*(\w|\W)*\*\/'
+t_CHARCON    = r'\'([ -~] | \n | \0)\''
+t_STRINGCON  = r'\"([ -~] | \0)*\"'
 t_ASSIGNMENT = r'='
 
 # More specefic regex
@@ -127,8 +127,8 @@ def p_prog(p):
 #     | [ extern ] void id '(' param_typesm_typesarm_types ')' { ',' id '(' parm_types ')' }
 def p_dcl_first(p): # dcl : type var_decl dcl_prime
     '''dcl : type var_decl dcl_p
-           | dcl_extern VOID ID LPAREN param_types RPAREN dcl_p
-           | dcl_extern type ID LPAREN param_types RPAREN dcl_p'''
+           | dcl_extern func_type ID LPAREN param_types RPAREN dcl_p'''
+#'''           | dcl_extern type ID LPAREN param_types RPAREN dcl_p'''
     if(len(p) > 4):
         p[0] = Dcl('dcl', [(p[4], p[3], p[6] ), *p[8]] ,p[1])
     else:
@@ -157,11 +157,15 @@ def p_dcl_pp(p):
 
 # var_decl : id [ '[' intcon ']' ]
 def p_var_decl(p):
-    '''var_decl : ID
-                | ID LSQUARE INTCON RSQUARE'''
-    p[0] = VarDecl('var_decl', None, p[1])
-    if(len(p) > 2):
-        p[0].num_elements = int(p[3])
+    '''var_decl : ID var_decl_p'''
+    p[0] = VarDecl('var_decl', None, (p[1], p[2]))
+def p_var_decl_p(p):
+    '''var_decl_p : LSQUARE INTCON RSQUARE
+                  |'''
+    if(len(p) > 1):
+        p[0] = p[2]
+    else:
+        p[0] = None
 
 # type : char
 #      | int
@@ -194,7 +198,7 @@ def p_param_types_more(p):
 # func : type id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 #      | void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 def p_func(p):
-    '''func : func_type ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat SEMICOLON'''
+    '''func : func_type ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
     p[0] = Func('func', (p[7], p[8]), (p[1], p[2], p[4]))
 def p_func_type(p):
     '''func_type : type
@@ -290,7 +294,7 @@ def p_assg_p(p):
 #      | charcon
 #      | stringcon
 def p_expr_single(p):
-    '''expr : MINUS expr
+    '''expr : MINUS expr %prec UMINUS
             | NOT expr'''
     p[0] = Expr('expr', p[2], p[1])
 def p_expr_multi(p):
@@ -357,11 +361,13 @@ def p_logical_op(p):
 
 # Define precedence
 precedence = (
-        ('left', 'AND', 'OR'),
+        ('left', 'OR'),
+        ('left', 'AND'),
         ('left', 'EQUAL', 'NOTEQUAL'),
         ('left', 'LESS', 'MORE', 'LESSEQUAL', 'MOREEQUAL'),
         ('left', 'PLUS', 'MINUS'),
-        ('left', 'TIMES', 'DIVIDE')
+        ('left', 'TIMES', 'DIVIDE'),
+        ('right', 'UMINUS', 'NOT'),
     )
 
 # Build the parser
