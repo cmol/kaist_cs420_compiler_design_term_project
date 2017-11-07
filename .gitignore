@@ -1,6 +1,8 @@
 # Specific things for Claus
 report_hw02/*
 report_hw03/*
+parsetab.py
+parser.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
