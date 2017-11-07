@@ -7,3 +7,8 @@ class Node:
 class BinOP(Node):
     def __init__(self,*args):
         super().__init__(**locals())
+
+class Prog(Node):
+    def __init__(self,*args):
+        super().__init__(**locals())
+
