@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import ply.lex as lex
 from parser_types import *
+import sys
 
 Prog(None,None,None)
 
@@ -122,6 +123,8 @@ def p_prog(p):
     '''prog : prog dcl SEMICOLON
             | prog func
             |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 1):
         if(p[1] != None):
             p[0] = [*p[1], p[2]]
@@ -165,6 +168,8 @@ def p_dcl_first(p): # dcl : type var_decl dcl_prime
            | EXTERN CHAR ID LPAREN param_types RPAREN dcl_p
            | EXTERN INT ID LPAREN param_types RPAREN dcl_p
            | EXTERN VOID ID LPAREN param_types RPAREN dcl_p'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 6):
         if(p[7] != None):
             p[0] = Dcl('dcl', [(p[3], p[5]), *p[7]] , [p[2], p[1]])
@@ -183,6 +188,8 @@ def p_dcl_first(p): # dcl : type var_decl dcl_prime
 def p_dcl_p(p):
     '''dcl_p : COMMA var_decl dcl_pp
              |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(p != None and len(p) > 1):
         if(p[3] != None):
             p[0] = [p[2], *p[3]]
@@ -193,6 +200,8 @@ def p_dcl_p(p):
 def p_dcl_pp(p):
     ''' dcl_pp : COMMA ID LPAREN param_types RPAREN dcl_pp
                |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(p != None and len(p) > 1):
         print(len(p))
         if(p[6] != None):
@@ -206,6 +215,8 @@ def p_dcl_pp(p):
 def p_var_decl(p):
     '''var_decl : ID'''
     '''var_decl : ID LSQUARE INTCON RSQUARE'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = VarDecl('var_decl', None, (p[1], p[3] if len(p) > 2 else None))
 
 # type : char
@@ -213,6 +224,8 @@ def p_var_decl(p):
 def p_typy(p):
     '''type : CHAR
             | INT'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = Type('type', None, p[1])
 
 # parm_types : void
@@ -220,6 +233,8 @@ def p_typy(p):
 def p_param_types(p):
     '''param_types : VOID
                    | type ID param_types_array param_types_more'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 2):
         if(p[4] != None):
             p[0] = ParamTypes('param_types', [(p[2], p[1], p[3]), *p[4]])
@@ -230,6 +245,8 @@ def p_param_types(p):
 def p_param_types_array(p):
     '''param_types_array : LPAREN RPAREN
                          |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 2):
         p[0] = "array"
     else:
@@ -237,6 +254,8 @@ def p_param_types_array(p):
 def p_param_types_more(p):
     '''param_types_more : COMMA type ID param_types_array param_types_more
                         |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(p != None and len(p) > 5):
         if(p[5] != None):
             p[0] = [(p[3], p[2], p[4]), *p[5]]
@@ -251,6 +270,8 @@ def p_func(p):
     '''func : CHAR ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
     '''func : INT ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
     '''func : VOID ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     func_vars = p[7] if p[7] != None else None
     func_stmt = p[8] if p[8] != None else None
     p[0] = Func('func', (func_vars, func_stmt), (p[1], p[2], p[4]))
@@ -267,6 +288,8 @@ def p_func_dcl(p):
 def p_func_dcl_p(p):
     '''func_dcl_p : COMMA var_decl func_dcl_p
                   |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(p != None and len(p) > 1):
         if(p[3] != None):
             p[0] = [p[2], *p[3]]
@@ -286,19 +309,27 @@ def p_func_dcl_p(p):
 def p_stmt_if(p):
     '''stmt : IF LPAREN expr RPAREN stmt
             | IF LPAREN expr RPAREN stmt ELSE stmt'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 6):
         p[0] = IfStmt('ifstmt', [p[5],p[7]], p[3])
     else:
         p[0] = IfStmt('ifstmt', [p[5]], p[3])
 def p_stmt_while(p):
     '''stmt : WHILE LPAREN expr RPAREN stmt'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = WhileStmt('whilestmt', p[5], p[3])
 def p_stmt_for(p):
     '''stmt : FOR LPAREN stmt_opt_assg SEMICOLON stmt_opt_expr SEMICOLON stmt_opt_assg RPAREN stmt'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = ForStmt('forstmt', p[9] ,[p[3],p[5],p[7]])
 def p_stmt_opt_assg(p):
     '''stmt_opt_assg : assg
                      |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 1):
         p[0] = p[1]
     else:
@@ -306,25 +337,37 @@ def p_stmt_opt_assg(p):
 def p_stmt_opt_expr(p):
     '''stmt_opt_expr : expr
                      |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 1):
         p[0] = p[1]
     else:
         p[0]
 def p_stmt_return(p):
     '''stmt : RETURN stmt_opt_expr SEMICOLON'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = ReturnStmt('returnstmt', None, p[2])
 def p_stmt_assg(p):
     '''stmt : assg SEMICOLON'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = Assg('assg',None, p[1])
 def p_stmt_id(p):
     '''stmt : ID LPAREN expr_pp RPAREN SEMICOLON'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = CallStmt('callstmt', p[3], p[1])
 def p_stmt_enclose(p):
     '''stmt : LCURLY stmt_repeat RCURLY'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = StmtEnclose('stmtenclose', p[2], None)
 def p_stmt_repeat(p):
     '''stmt_repeat : stmt stmt_repeat
                    |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(p != None and len(p) > 1):
         if(p[2] != None):
             p[0] = [p[1], *p[2]]
@@ -334,15 +377,21 @@ def p_stmt_repeat(p):
         p[0] = None
 def p_stmt_end(p):
     '''stmt : SEMICOLON'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = None
 
 # assg : id [ '[' expr ']' ] = expr
 def p_assg(p):
     '''assg : ID assg_p ASSIGNMENT expr'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = Assg('Assg', p[4], (p[1], p[2]) )
 def p_assg_p(p):
     '''assg_p : LSQUARE expr RSQUARE
             |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     if(len(p) > 2):
         p[0] = p[2]
     else:
@@ -361,6 +410,8 @@ def p_assg_p(p):
 def p_expr_single(p):
     '''expr : MINUS expr %prec UMINUS
             | NOT expr'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = Expr('expr', p[2], p[1])
 def p_expr_multi(p):
     '''expr : expr PLUS expr
@@ -375,29 +426,43 @@ def p_expr_multi(p):
             | expr MORE expr
             | expr AND expr
             | expr OR expr'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = Expr('expr', [p[1], p[3]], p[2])
 def p_expr_terminals(p):
     '''expr : INTCON
             | CHARCON
             | STRINGCON'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = Expr('expr', None, p[1])
 def p_expr_sub(p):
     '''expr : LPAREN expr RPAREN'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = p[2]
 def p_expr_id(p):
     '''expr : ID expr_p'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = Expr('expr', p[2], p[1])
 def p_expr_p(p):
     '''expr_p : LPAREN expr_pp RPAREN
               | LSQUARE expr RSQUARE'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = p[2]
 def p_expr_pp(p):
     '''expr_pp : expr expr_ppp
                |'''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = [p[1], *p[2]]
 def p_expr_ppp(p):
     '''expr_ppp : COMMA expr expr_ppp
                 | '''
+    if VERBOSE:
+        print(sys._getframe().f_code.co_name)
     p[0] = [p[2], *p[3]]
 
 # binop : +
