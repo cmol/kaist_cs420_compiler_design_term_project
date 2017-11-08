@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#import ply.lex as lex
+import ply.lex as lex
 from parser_types import *
 
 Prog(None,None,None)
@@ -122,7 +122,10 @@ def p_prog(p):
     '''prog : prog dcl SEMICOLON
             | prog func
             |'''
-    p[0] = Prog('prog', [p[1], p[2]], None)
+    if(len(p) > 1):
+        p[0] = Prog('prog', [p[1], p[2]], None)
+    else:
+        p[0] = None
 
 # dcl : type var_decl { ',' var_decl }
 #     | [ extern ] type id '(' param_typesm_types ')' { ',' id '(' parm_types ')' }
@@ -145,7 +148,7 @@ def p_dcl_extern(p):
 def p_dcl_p(p):
     '''dcl_p : COMMA var_decl dcl_pp
              |'''
-    if(len(p[0]) > 1):
+    if(p != None and len(p) > 1):
         p[0] = [p[2], *p[3]]
     else:
         pass
