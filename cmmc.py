@@ -135,9 +135,12 @@ def p_dcl_first(p): # dcl : type var_decl dcl_prime
            | dcl_extern func_type ID LPAREN param_types RPAREN dcl_p'''
 #'''           | dcl_extern type ID LPAREN param_types RPAREN dcl_p'''
     if(len(p) > 4):
-        p[0] = Dcl('dcl', [(p[4], p[3], p[6] ), *p[8]] ,p[1])
-    else:
+        p[0] = Dcl('dcl', [(p[3], p[2], p[5] ), *p[7]] ,p[1])
+    elif(p[3] != None):
         p[0] = Dcl('dcl', [ p[1], [p[2], *p[3]] ], None)
+    else:
+        p[0] = Dcl('dcl', [ p[1], [p[2]] ], None)
+
 def p_dcl_extern(p):
     '''dcl_extern : EXTERN
                   |'''
@@ -149,16 +152,23 @@ def p_dcl_p(p):
     '''dcl_p : COMMA var_decl dcl_pp
              |'''
     if(p != None and len(p) > 1):
-        p[0] = [p[2], *p[3]]
+        if(p[3] != None):
+            p[0] = [p[2], *p[3]]
+        else:
+            p[0] = [p[2]]
     else:
-        pass
+        p[0] = None
 def p_dcl_pp(p):
     ''' dcl_pp : COMMA ID LPAREN param_types RPAREN dcl_pp
                |'''
-    if(len(p[0]) > 1):
-        p[0] = [(p[2], p[4]), *p[6]]
+    if(p != None and len(p) > 1):
+        print(len(p))
+        if(p[6] != None):
+            p[0] = [(p[2], p[4]), *p[6]]
+        else:
+            p[0] = [(p[2], p[4])]
     else:
-        pass
+        p[0] = None
 
 # var_decl : id [ '[' intcon ']' ]
 def p_var_decl(p):
@@ -389,11 +399,5 @@ precedence = (
 # Build the parser
 parser = yacc.yacc()
 
-while True:
-   try:
-       s = input('calc > ')
-   except EOFError:
-       break
-   if not s: continue
-   result = parser.parse(s)
-   print(result)
+result = parser.parse(data)
+print(result)
