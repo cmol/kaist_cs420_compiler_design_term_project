@@ -237,8 +237,11 @@ def p_param_types_array(p):
 def p_param_types_more(p):
     '''param_types_more : COMMA type ID param_types_array param_types_more
                         |'''
-    if(p != None and len(p) > 1):
-        p[0] = [(p[4], p[3], p[5]), *p[6]]
+    if(p != None and len(p) > 5):
+        if(p[5] != None):
+            p[0] = [(p[3], p[2], p[4]), *p[5]]
+        else:
+            p[0] = [(p[3], p[2], p[4])]
     else:
         p[0] = None
 
