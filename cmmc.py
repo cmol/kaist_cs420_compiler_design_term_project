@@ -219,20 +219,12 @@ def p_var_decl(p):
         print(sys._getframe().f_code.co_name)
     p[0] = VarDecl('var_decl', None, (p[1], p[3] if len(p) > 2 else None))
 
-# type : char
-#      | int
-def p_typy(p):
-    '''type : CHAR
-            | INT'''
-    if VERBOSE:
-        print(sys._getframe().f_code.co_name)
-    p[0] = Type('type', None, p[1])
-
 # parm_types : void
 #            | type id [ '[' ']' ] { ',' type id [ '[' ']' ] }
 def p_param_types(p):
     '''param_types : VOID
-                   | type ID param_types_array param_types_more'''
+                   | CHAR ID param_types_array param_types_more
+                   | INT ID param_types_array param_types_more'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     if(len(p) > 2):
@@ -252,7 +244,8 @@ def p_param_types_array(p):
     else:
         p[0] = None
 def p_param_types_more(p):
-    '''param_types_more : COMMA type ID param_types_array param_types_more
+    '''param_types_more : COMMA CHAR ID param_types_array param_types_more
+       param_types_more : COMMA INT ID param_types_array param_types_more
                         |'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
@@ -276,13 +269,18 @@ def p_func(p):
     func_stmt = p[8] if p[8] != None else None
     p[0] = Func('func', (func_vars, func_stmt), (p[1], p[2], p[4]))
 def p_func_dcl(p):
-    '''func_dcl : type var_decl func_dcl_p SEMICOLON
+    '''func_dcl : CHAR var_decl func_dcl_p SEMICOLON func_dcl
+                | INT var_decl func_dcl_p SEMICOLON func_dcl
                 |'''
     if(p != None and len(p) > 1):
         if(p[3] != None):
-            p[0] = (p[1], [p[2], *p[3]])
+            first_var = (p[1], [p[2], *p[3]])
         else:
-            p[0] = (p[1], [p[2]])
+            first_var = (p[1], [p[2]])
+        if(p[5] != None):
+            p[0] = [first_var, *p[5]]
+        else:
+            p[0] = [first_var]
     else:
         p[0] = None
 def p_func_dcl_p(p):
@@ -307,14 +305,20 @@ def p_func_dcl_p(p):
 #      | '{' { stmt } '}'
 #      | ';'
 def p_stmt_if(p):
-    '''stmt : IF LPAREN expr RPAREN stmt
-            | IF LPAREN expr RPAREN stmt ELSE stmt'''
+    '''stmt : IF LPAREN expr RPAREN stmt stmt_else'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    if(len(p) > 6):
-        p[0] = IfStmt('ifstmt', [p[5],p[7]], p[3])
+    if(p[6] != None):
+        p[0] = IfStmt('ifstmt', [p[5],p[6]], p[3])
     else:
         p[0] = IfStmt('ifstmt', [p[5]], p[3])
+def p_stmt_else(p):
+    '''stmt_else : ELSE stmt
+                 |'''
+    if(p != None and len(p) > 1):
+        p[0] = p[2]
+    else:
+        p[0] = None
 def p_stmt_while(p):
     '''stmt : WHILE LPAREN expr RPAREN stmt'''
     if VERBOSE:
@@ -514,5 +518,5 @@ parser = yacc.yacc()
 
 print(data)
 
-result = parser.parse(data)
+result = parser.parse(data, debug=0)
 print(result)
