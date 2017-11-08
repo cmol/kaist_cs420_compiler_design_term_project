@@ -105,14 +105,14 @@ lexer = lex.lex()
 # Give the lexer some input
 with open ("test.c", "r") as myfile:
     data=myfile.read()
-lexer.input(data)
+#lexer.input(data)
 
 # Tokenize
-while True:
-    tok = lexer.token()
-    if not tok:
-        break      # No more input
-    print(tok)
+#while True:
+#    tok = lexer.token()
+#    if not tok:
+#        break      # No more input
+#    print(tok)
 
 # Start the parsing
 import ply.yacc as yacc
@@ -123,9 +123,35 @@ def p_prog(p):
             | prog func
             |'''
     if(len(p) > 1):
-        p[0] = Prog('prog', [p[1], p[2]], None)
+        if(p[1] != None):
+            p[0] = [*p[1], p[2]]
+        else:
+            p[0] = [p[2]]
     else:
         p[0] = None
+# def p_prog(p):
+#    '''prog : prog_p'''
+#    if(p[1] != None):
+#        p[0] = Prog('prog', p[1],None)
+#    else:
+#        p[0] = None
+# def p_prog_p(p):
+#    '''prog_p : dcl SEMICOLON prog_p
+#              | func prog_p
+#              |'''
+#    if(p != None and len(p) > 1):
+#        if(p[2] == ";"):
+#            if(p[3] != None):
+#                p[0] = [p[1], *p[3]]
+#            else:
+#                p[0] = [p[1]]
+#        else:
+#            if(p[2] != None):
+#                p[0] = [p[1], *p[2]]
+#            else:
+#                p[0] = [p[1]]
+#    else:
+#        p[0] = None
 
 # dcl : type var_decl { ',' var_decl }
 #     | [ extern ] type id '(' param_typesm_types ')' { ',' id '(' parm_types ')' }
@@ -425,6 +451,8 @@ precedence = (
 
 # Build the parser
 parser = yacc.yacc()
+
+print(data)
 
 result = parser.parse(data)
 print(result)
