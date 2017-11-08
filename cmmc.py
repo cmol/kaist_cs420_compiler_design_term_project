@@ -3,7 +3,7 @@ import ply.lex as lex
 from parser_types import *
 import sys
 
-Prog(None,None,None)
+VERBOSE = False
 
 # List of keywords
 keywords = {
@@ -213,8 +213,8 @@ def p_dcl_pp(p):
 
 # var_decl : id [ '[' intcon ']' ]
 def p_var_decl(p):
-    '''var_decl : ID'''
-    '''var_decl : ID LSQUARE INTCON RSQUARE'''
+    '''var_decl : ID
+       var_decl : ID LSQUARE INTCON RSQUARE'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     p[0] = VarDecl('var_decl', None, (p[1], p[3] if len(p) > 2 else None))
@@ -267,9 +267,9 @@ def p_param_types_more(p):
 # func : type id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 #      | void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 def p_func(p):
-    '''func : CHAR ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
-    '''func : INT ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
-    '''func : VOID ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
+    '''func : CHAR ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY
+       func : INT ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY
+       func : VOID ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     func_vars = p[7] if p[7] != None else None
