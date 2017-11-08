@@ -155,25 +155,31 @@ def p_prog(p):
 
 # dcl : type var_decl { ',' var_decl }
 #     | [ extern ] type id '(' param_typesm_types ')' { ',' id '(' parm_types ')' }
-#     | [ extern ] void id '(' param_typesm_typesarm_types ')' { ',' id '(' parm_types ')' }
+#     | [ extern ] void id '(' param_typesm_types ')' { ',' id '(' parm_types ')' }
 def p_dcl_first(p): # dcl : type var_decl dcl_prime
-    '''dcl : type var_decl dcl_p
-           | dcl_extern func_type ID LPAREN param_types RPAREN dcl_p'''
-#'''           | dcl_extern type ID LPAREN param_types RPAREN dcl_p'''
-    if(len(p) > 4):
-        p[0] = Dcl('dcl', [(p[3], p[2], p[5] ), *p[7]] ,p[1])
-    elif(p[3] != None):
-        p[0] = Dcl('dcl', [ p[1], [p[2], *p[3]] ], None)
+    '''dcl : CHAR var_decl dcl_p
+           | INT var_decl dcl_p
+           | CHAR ID LPAREN param_types RPAREN dcl_p
+           | INT ID LPAREN param_types RPAREN dcl_p
+           | VOID ID LPAREN param_types RPAREN dcl_p
+           | EXTERN CHAR ID LPAREN param_types RPAREN dcl_p
+           | EXTERN INT ID LPAREN param_types RPAREN dcl_p
+           | EXTERN VOID ID LPAREN param_types RPAREN dcl_p'''
+    if(len(p) > 6):
+        if(p[7] != None):
+            p[0] = Dcl('dcl', [(p[3], p[5]), *p[7]] , [p[2], p[1]])
+        else:
+            p[0] = Dcl('dcl', [(p[3], p[5])] ,[p[2], p[1]])
+    elif(len(p) > 4):
+        if(p[6] != None):
+            p[0] = Dcl('dcl', [(p[2], p[4]), *p[6]] ,p[1])
+        else:
+            p[0] = Dcl('dcl', [(p[2], p[4])] ,p[1])
     else:
-        p[0] = Dcl('dcl', [ p[1], [p[2]] ], None)
-
-def p_dcl_extern(p):
-    '''dcl_extern : EXTERN
-                  |'''
-    if(len(p) > 1):
-        p[0] = p[1]
-    else:
-        p[0] = None
+        if(p[3] != None):
+            p[0] = Dcl('dcl', [ p[1], [p[2], *p[3]] ], None)
+        else:
+            p[0] = Dcl('dcl', [ p[1], [p[2]] ], None)
 def p_dcl_p(p):
     '''dcl_p : COMMA var_decl dcl_pp
              |'''
@@ -201,13 +207,6 @@ def p_var_decl(p):
     '''var_decl : ID'''
     '''var_decl : ID LSQUARE INTCON RSQUARE'''
     p[0] = VarDecl('var_decl', None, (p[1], p[3] if len(p) > 2 else None))
-def p_var_decl_p(p):
-    '''var_decl_p : LSQUARE INTCON RSQUARE
-                  |'''
-    if(len(p) > 1):
-        p[0] = p[2]
-    else:
-        p[0] = None
 
 # type : char
 #      | int
@@ -246,15 +245,12 @@ def p_param_types_more(p):
 # func : type id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 #      | void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 def p_func(p):
-    '''func : func_type ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
+    '''func : CHAR ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
+    '''func : INT ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
+    '''func : VOID ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
     func_vars = p[7] if p[7] != None else None
     func_stmt = p[8] if p[8] != None else None
     p[0] = Func('func', (func_vars, func_stmt), (p[1], p[2], p[4]))
-
-def p_func_type(p):
-    '''func_type : type
-                 | VOID'''
-    p[0] = p[1]
 def p_func_dcl(p):
     '''func_dcl : type var_decl func_dcl_p SEMICOLON
                 |'''
@@ -285,16 +281,12 @@ def p_func_dcl_p(p):
 #      | '{' { stmt } '}'
 #      | ';'
 def p_stmt_if(p):
-    '''stmt : IF LPAREN expr RPAREN stmt'''
-    '''     | IF LPAREN expr RPAREN stmt ELSE stmt'''
-    p[0] = IfStmt('ifstmt', [p[5],p[7]], p[3])
-def p_stmt_else(p):
-    '''stmt_else : ELSE stmt
-                 |'''
-    if(len(p) > 2):
-        p[0] = p[2]
+    '''stmt : IF LPAREN expr RPAREN stmt
+            | IF LPAREN expr RPAREN stmt ELSE stmt'''
+    if(len(p) > 6):
+        p[0] = IfStmt('ifstmt', [p[5],p[7]], p[3])
     else:
-        p[0] = None
+        p[0] = IfStmt('ifstmt', [p[5]], p[3])
 def p_stmt_while(p):
     '''stmt : WHILE LPAREN expr RPAREN stmt'''
     p[0] = WhileStmt('whilestmt', p[5], p[3])
