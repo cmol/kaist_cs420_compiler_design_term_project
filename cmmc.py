@@ -196,7 +196,10 @@ def p_param_types(p):
     '''param_types : VOID
                    | type ID param_types_array param_types_more'''
     if(len(p) > 2):
-        p[0] = ParamTypes('param_types', [(p[2], p[1], p[3]), *p[4]])
+        if(p[4] != None):
+            p[0] = ParamTypes('param_types', [(p[2], p[1], p[3]), *p[4]])
+        else:
+            p[0] = ParamTypes('param_types', [(p[2], p[1], p[3])])
     else:
         p[0] = ParamTypes('param_types', None, p[1])
 def p_param_types_array(p):
@@ -209,13 +212,19 @@ def p_param_types_array(p):
 def p_param_types_more(p):
     '''param_types_more : COMMA type ID param_types_array param_types_more
                         |'''
-    p[0] = [(p[4], p[3], p[5]), *p[6]]
+    if(p != None and len(p) > 1):
+        p[0] = [(p[4], p[3], p[5]), *p[6]]
+    else:
+        p[0] = None
 
 # func : type id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 #      | void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 def p_func(p):
     '''func : func_type ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
-    p[0] = Func('func', (p[7], p[8]), (p[1], p[2], p[4]))
+    func_vars = p[7] if p[7] != None else None
+    func_stmt = p[8] if p[8] != None else None
+    p[0] = Func('func', (func_vars, func_stmt), (p[1], p[2], p[4]))
+
 def p_func_type(p):
     '''func_type : type
                  | VOID'''
@@ -223,11 +232,23 @@ def p_func_type(p):
 def p_func_dcl(p):
     '''func_dcl : type var_decl func_dcl_p SEMICOLON
                 |'''
-    p[0] = (p[1], [p[2], *p[3]])
+    if(p != None and len(p) > 1):
+        if(p[3] != None):
+            p[0] = (p[1], [p[2], *p[3]])
+        else:
+            p[0] = (p[1], [p[2]])
+    else:
+        p[0] = None
 def p_func_dcl_p(p):
     '''func_dcl_p : COMMA var_decl func_dcl_p
                   |'''
-    p[0] = [p[2], *p[3]]
+    if(p != None and len(p) > 1):
+        if(p[3] != None):
+            p[0] = [p[2], *p[3]]
+        else:
+            p[0] = [p[2]]
+    else:
+        p[0] = None
 
 # stmt : if '(' expr ')' stmt [ else stmt ]
 #      | while '(' expr ')' stmt
@@ -283,7 +304,13 @@ def p_stmt_enclose(p):
 def p_stmt_repeat(p):
     '''stmt_repeat : stmt stmt_repeat
                    |'''
-    p[0] = [p[1], *p[2]]
+    if(p != None and len(p) > 1):
+        if(p[2] != None):
+            p[0] = [p[1], *p[2]]
+        else:
+            p[0] = [p[2]]
+    else:
+        p[0] = None
 def p_stmt_end(p):
     '''stmt : SEMICOLON'''
     p[0] = None
