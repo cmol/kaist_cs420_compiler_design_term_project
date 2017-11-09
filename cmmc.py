@@ -132,29 +132,6 @@ def p_prog(p):
             p[0] = [p[2]]
     else:
         p[0] = None
-# def p_prog(p):
-#    '''prog : prog_p'''
-#    if(p[1] != None):
-#        p[0] = Prog('prog', p[1],None)
-#    else:
-#        p[0] = None
-# def p_prog_p(p):
-#    '''prog_p : dcl SEMICOLON prog_p
-#              | func prog_p
-#              |'''
-#    if(p != None and len(p) > 1):
-#        if(p[2] == ";"):
-#            if(p[3] != None):
-#                p[0] = [p[1], *p[3]]
-#            else:
-#                p[0] = [p[1]]
-#        else:
-#            if(p[2] != None):
-#                p[0] = [p[1], *p[2]]
-#            else:
-#                p[0] = [p[1]]
-#    else:
-#        p[0] = None
 
 # dcl : type var_decl { ',' var_decl }
 #     | [ extern ] type id '(' param_typesm_types ')' { ',' id '(' parm_types ')' }
@@ -484,39 +461,6 @@ def p_expr_ppp(p):
             p[0] = [p[2]]
     else:
         p[0] = None
-
-# binop : +
-#       |–
-#       |*
-#       |/
-# def p_binop(p):
-#    '''binop : PLUS
-#             | MINUS
-#             | TIMES
-#             | DIVIDE'''
-#    p[0] = BinOp('binop', None, p[1])
-
-# relop : ==
-#       | !=
-#       | <=
-#       | <
-#       | >=
-#       | >
-# def p_relop(p):
-#    '''relop : EQUAL
-#             | NOTEQUAL
-#             | LESSEQUAL
-#             | LESS
-#             | MOREEQUAL
-#             | MORE'''
-#    p[0] = RelOp('relop', None, p[1])
-
-# logical_op : &&
-#            | ||
-# def p_logical_op(p):
-#    '''logical_op : AND
-#                  | OR'''
-#    p[0] = LogicalOp('logical_op', None, p[1])
 
 # Define precedence
 precedence = (
