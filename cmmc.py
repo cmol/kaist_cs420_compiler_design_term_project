@@ -474,14 +474,9 @@ precedence = (
     )
 
 # Globals
-global vars_global
-global funcs_global
-global vars_stacks
 
 # Build the parser
 parser = yacc.yacc()
-
-print(data)
 
 result = parser.parse(data, debug=0)
 for node in result:
@@ -489,3 +484,5 @@ for node in result:
 
 print(result)
 print(vars_global)
+print(funcs_global)
+print(vars_stacks)

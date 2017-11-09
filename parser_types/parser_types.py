@@ -1,9 +1,24 @@
-def add_global_vars(var_type, var):
-    pass
-def add_global_funcs(**args):
-    pass
-def add_vars_stacks(**args):
-    pass
+global funcs_global
+global vars_stacks
+global vars_global
+funcs_global = []
+vars_stacks  = []
+vars_global  = []
+
+def add_global_vars(var_type, v):
+    vars_global.append([var_type,v.ID, v.array])
+
+def add_global_funcs(f):
+    funcs_global.append((f.name, f.return_type, f.parameters))
+
+def add_vars_stack():
+    vars_stacks.append([])
+
+def del_vars_stack():
+    vars_stacks.pop()
+
+def push_var(var):
+    vars_stacks[-1].append([var.ID, var.array, None])
 
 
 class Node:
@@ -18,8 +33,6 @@ class VarDecl(Node):
         self.array = self.leafs[1]
 
 class Dcl(Node):
-#    def __init__(self,*args):
-#        super().__init__(**locals())
     def prepare(self):
         if self.kind == 'dcl-func-extern':
             self.extern = True
@@ -34,10 +47,10 @@ class Dcl(Node):
         else:
             self.type = self.leafs
             self.vars = self.children
-            add_global_vars(self.type, self.vars)
-        for child in self.children:
-            if child != None:
-                child.prepare()
+        for var in self.vars:
+            if var != None:
+                var.prepare()
+                add_global_vars(self.type, var)
 
 class ParamTypes(Node):
     pass
@@ -51,24 +64,33 @@ class Func(Node):
         self.parameters  = self.leafs[2]
         self.func_vars   = self.children[0]
         self.func_stmts  = self.children[1]
+        add_global_funcs(self)
+        add_vars_stack()
 
         for var in self.func_vars:
             for v in var[1]:
                 v.prepare()
+                push_var(v)
         for stmt in self.func_stmts:
             if stmt != None:
                 stmt.prepare()
             else:
                 self.func_stmts.remove(stmt)
 
+        del_vars_stack()
+
 class IfStmt(Node):
     def prepare(self):
         self.expr    = self.leafs
         self.stmt_if = self.children[0]
-        self.stmt_if.prepare()
+        if self.expr != None:
+            self.expr.prepare()
+        if self.stmt_if != None:
+            self.stmt_if.prepare()
         if self.kind == 'ifstmt-else':
             self.stmt_else = self.children[1]
-            self.stmt_else.prepare()
+            if self.stmt_else != None:
+                self.stmt_else.prepare()
 
 class WhileStmt(Node):
     pass
@@ -90,7 +112,6 @@ class ReturnStmt(Node):
 
 class Assg(Node):
     def prepare(self):
-        print(self.leafs)
         self.ID     = self.leafs[0]
         self.array  = self.leafs[1]
         self.assign = self.children
@@ -116,5 +137,5 @@ class Expr(Node):
         self.exprs = self.children
         self.qualifier = self.leafs
         if self.exprs != None:
-            for expr in exprs:
+            for expr in self.exprs:
                 expr.prepare()
