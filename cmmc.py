@@ -452,22 +452,38 @@ def p_expr_id(p):
     p[0] = Expr('expr', p[2], p[1])
 def p_expr_p(p):
     '''expr_p : LPAREN expr_pp RPAREN
-              | LSQUARE expr RSQUARE'''
+              | LSQUARE expr RSQUARE
+              |'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = p[2]
+    if(p != None and len(p) > 1):
+        p[0] = p[2]
+    else:
+        p[0] = None
 def p_expr_pp(p):
     '''expr_pp : expr expr_ppp
                |'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = [p[1], *p[2]]
+    if(p != None and len(p) > 1):
+        if(p[2] != None):
+            p[0] = [p[1], *p[2]]
+        else:
+            p[0] = [p[1]]
+    else:
+        p[0] = None
 def p_expr_ppp(p):
     '''expr_ppp : COMMA expr expr_ppp
                 | '''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = [p[2], *p[3]]
+    if(p != None and len(p) > 1):
+        if(p[3] != None):
+            p[0] = [p[2], *p[3]]
+        else:
+            p[0] = [p[2]]
+    else:
+        p[0] = None
 
 # binop : +
 #       |–
