@@ -149,19 +149,19 @@ def p_dcl_first(p): # dcl : type var_decl dcl_prime
         print(sys._getframe().f_code.co_name)
     if(len(p) > 6):
         if(p[7] != None):
-            p[0] = Dcl('dcl', [(p[3], p[5]), *p[7]] , [p[2], p[1]])
+            p[0] = Dcl('dcl-func-extern', [(p[3], p[5]), *p[7]], p[2])
         else:
-            p[0] = Dcl('dcl', [(p[3], p[5])] ,[p[2], p[1]])
+            p[0] = Dcl('dcl-func-extern', [(p[3], p[5])], p[2])
     elif(len(p) > 4):
         if(p[6] != None):
-            p[0] = Dcl('dcl', [(p[2], p[4]), *p[6]] ,p[1])
+            p[0] = Dcl('dcl-func', [(p[2], p[4]), *p[6]] ,p[1])
         else:
-            p[0] = Dcl('dcl', [(p[2], p[4])] ,p[1])
+            p[0] = Dcl('dcl-func', [(p[2], p[4])] ,p[1])
     else:
         if(p[3] != None):
-            p[0] = Dcl('dcl', [ p[1], [p[2], *p[3]] ], None)
+            p[0] = Dcl('dcl-var', [ p[2], *p[3] ], p[1])
         else:
-            p[0] = Dcl('dcl', [ p[1], [p[2]] ], None)
+            p[0] = Dcl('dcl-var', [ p[2] ], p[1])
 def p_dcl_p(p):
     '''dcl_p : COMMA var_decl dcl_pp
              |'''
@@ -286,7 +286,7 @@ def p_stmt_if(p):
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     if(p[6] != None):
-        p[0] = IfStmt('ifstmt', [p[5],p[6]], p[3])
+        p[0] = IfStmt('ifstmt-else', [p[5],p[6]], p[3])
     else:
         p[0] = IfStmt('ifstmt', [p[5]], p[3])
 def p_stmt_else(p):
@@ -333,7 +333,7 @@ def p_stmt_assg(p):
     '''stmt : assg SEMICOLON'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Assg('assg',None, p[1])
+    p[0] = p[1]
 def p_stmt_id(p):
     '''stmt : ID LPAREN expr_pp RPAREN SEMICOLON'''
     if VERBOSE:
@@ -367,7 +367,7 @@ def p_assg(p):
     '''assg : ID assg_p ASSIGNMENT expr'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Assg('Assg', p[4], (p[1], p[2]) )
+    p[0] = Assg('Assg', [p[4]], (p[1], p[2]) )
 def p_assg_p(p):
     '''assg_p : LSQUARE expr RSQUARE
             |'''
@@ -393,7 +393,7 @@ def p_expr_single(p):
             | NOT expr'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Expr('expr', p[2], p[1])
+    p[0] = Expr('expr', [p[2]], p[1])
 def p_expr_multi(p):
     '''expr : expr PLUS expr
             | expr MINUS expr
@@ -426,7 +426,7 @@ def p_expr_id(p):
     '''expr : ID expr_p'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Expr('expr', p[2], p[1])
+    p[0] = Expr('expr', [p[2]], p[1])
 def p_expr_p(p):
     '''expr_p : LPAREN expr_pp RPAREN
               | LSQUARE expr RSQUARE
@@ -473,10 +473,19 @@ precedence = (
         ('right', 'UMINUS', 'NOT'),
     )
 
+# Globals
+global vars_global
+global funcs_global
+global vars_stacks
+
 # Build the parser
 parser = yacc.yacc()
 
 print(data)
 
 result = parser.parse(data, debug=0)
+for node in result:
+    node.prepare()
+
 print(result)
+print(vars_global)
