@@ -206,11 +206,11 @@ def p_param_types(p):
         print(sys._getframe().f_code.co_name)
     if(len(p) > 2):
         if(p[4] != None):
-            p[0] = ParamTypes('param_types', [(p[2], p[1], p[3]), *p[4]])
+            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3]), *p[4]], None)
         else:
-            p[0] = ParamTypes('param_types', [(p[2], p[1], p[3])])
+            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3])], None)
     else:
-        p[0] = ParamTypes('param_types', None, p[1])
+        p[0] = ParamTypes('param-types-void', None, [p[1]])
 def p_param_types_array(p):
     '''param_types_array : LPAREN RPAREN
                          |'''

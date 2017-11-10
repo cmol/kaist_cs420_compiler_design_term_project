@@ -9,7 +9,7 @@ def add_global_vars(var_type, v):
     vars_global.append([var_type,v.ID, v.array])
 
 def add_global_funcs(f):
-    funcs_global.append((f.name, f.return_type, f.parameters))
+    funcs_global.append((f.name, f.return_type, f.param_list))
 
 def add_vars_stack():
     vars_stacks.append([])
@@ -53,9 +53,12 @@ class Dcl(Node):
                 add_global_vars(self.type, var)
 
 class ParamTypes(Node):
-    pass
-#    def __init__(self,*args):
-#        super().__init__(**locals())
+    params = []
+    def prepare(self):
+        if self.kind == "param-types-void":
+            self.params = [None]
+        else:
+            self.params = self.children
 
 class Func(Node):
     def prepare(self):
@@ -64,19 +67,34 @@ class Func(Node):
         self.parameters  = self.leafs[2]
         self.func_vars   = self.children[0]
         self.func_stmts  = self.children[1]
-        add_global_funcs(self)
+
+        # Add stack for keeping vars
         add_vars_stack()
 
+        # Parameters
+        self.param_list = []
+        self.parameters.prepare()
+        for param in self.parameters.params:
+            if param != None:
+                self.param_list.append(param)
+
+        # Internal variables for the function
         for var in self.func_vars:
             for v in var[1]:
                 v.prepare()
                 push_var(v)
+
+        # Statements for the function
         for stmt in self.func_stmts:
             if stmt != None:
                 stmt.prepare()
             else:
                 self.func_stmts.remove(stmt)
 
+        # Add function to table
+        add_global_funcs(self)
+
+        # Delete variable stack
         del_vars_stack()
 
 class IfStmt(Node):
@@ -93,9 +111,11 @@ class IfStmt(Node):
                 self.stmt_else.prepare()
 
 class WhileStmt(Node):
-    pass
-#    def __init__(self,*args):
-#        super().__init__(**locals())
+    def prepare(self):
+        self.expr = self.children
+        self.stmt = self.leafs
+        self.expr.prepare()
+        self.stmt.prepare()
 
 class ForStmt(Node):
     def prepare(self):
@@ -106,9 +126,10 @@ class ForStmt(Node):
         self.stmt.prepare()
 
 class ReturnStmt(Node):
-    pass
-#    def __init__(self,*args):
-#        super().__init__(**locals())
+    def prepare(self):
+        self.stmt = self.leafs
+        if self.stmt != None:
+            self.stmt.prepare()
 
 class Assg(Node):
     def prepare(self):
@@ -119,9 +140,11 @@ class Assg(Node):
             assg.prepare()
 
 class CallStmt(Node):
-    pass
-#    def __init__(self,*args):
-#        super().__init__(**locals())
+    def prepare(self):
+        self.function = self.leafs
+        self.expr     = self.children
+        if self.expr != None:
+            self.expr.prepare()
 
 class StmtEnclose(Node):
     def prepare(self):
