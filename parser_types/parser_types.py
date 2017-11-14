@@ -199,9 +199,11 @@ class CallStmt(Node):
 
         # Type checking
         f = find_function(self.function)
+        # Check existence of name
         if not f:
             print("Function " + str(self.function) + " not found")
             exit(1)
+        # Check number of arguments
         if (len(f[2]) != len(self.children)
                 and f[0] != "printf" and len(self.children) > 1):
             print("Function %s takes %d arguments but %d was given" %
