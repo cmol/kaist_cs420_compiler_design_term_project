@@ -479,6 +479,10 @@ precedence = (
 parser = yacc.yacc()
 
 result = parser.parse(data, debug=0)
+
+# Add printf to the function table
+funcs_global.append(("printf", "void", []))
+
 for node in result:
     node.prepare()
 
