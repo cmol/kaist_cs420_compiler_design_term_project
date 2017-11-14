@@ -202,7 +202,8 @@ class CallStmt(Node):
         if not f:
             print("Function " + str(self.function) + " not found")
             exit(1)
-        if len(f[2]) != len(self.children):
+        if (len(f[2]) != len(self.children)
+                and f[0] != "printf" and len(self.children) > 1):
             print("Function %s takes %d arguments but %d was given" %
                     (f[0], len(f[2]),len(self.children)))
             exit(1)
