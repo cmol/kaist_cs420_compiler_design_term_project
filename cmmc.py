@@ -353,7 +353,7 @@ def p_stmt_repeat(p):
         if(p[2] != None):
             p[0] = [p[1], *p[2]]
         else:
-            p[0] = [p[2]]
+            p[0] = [p[1]]
     else:
         p[0] = None
 def p_stmt_end(p):

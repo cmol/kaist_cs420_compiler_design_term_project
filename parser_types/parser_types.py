@@ -18,8 +18,45 @@ def del_vars_stack():
     vars_stacks.pop()
 
 def push_var(var):
-    vars_stacks[-1].append([var.ID, var.array, None])
+    if var.array:
+        vars_stacks[-1].append([var.ID, var.array, []])
+    else:
+        vars_stacks[-1].append([var.ID, var.array, None])
 
+def find_var(vid):
+    for v in vars_stacks[-1]:
+        if v[0] == vid:
+            return v
+    for v in vars_global:
+        if v[0] == vid:
+            return v
+    return None
+
+def assign_var(vid, value, array):
+    if array:
+        for v in vars_stacks[-1]:
+            if v[0] == vid:
+                v[2][array] = value
+                return
+        for v in vars_global:
+            if v[0] == vid:
+                v[2][array] = value
+                return
+    else:
+        for v in vars_stacks[-1]:
+            if v[0] == vid:
+                v[2] = value
+                return
+        for v in vars_global:
+            if v[0] == vid:
+                v[2] = value
+                return
+
+def find_function(fid):
+    for f in funcs_global:
+        if f[0] == fid:
+            return f
+    return None
 
 class Node:
     def __init__(self,kind,children=None,leafs=None):
@@ -139,12 +176,37 @@ class Assg(Node):
         for assg in self.assign:
             assg.prepare()
 
+        # Type checking
+        v = find_var(self.ID)
+        if not v or (bool(v[1]) ^ bool(self.array)):
+            print("Type error! Cannot find " + str(self.ID))
+            print(self.array)
+            print("Current var stack: ")
+            print(vars_stacks[-1])
+            exit(1)
+
+
 class CallStmt(Node):
     def prepare(self):
         self.function = self.leafs
         self.expr     = self.children
         if self.expr != None:
-            self.expr.prepare()
+            if type(self.expr) is list:
+                for exp in self.expr:
+                    exp.prepare()
+            else:
+                self.expr.prepare()
+
+        # Type checking
+        f = find_function(self.function)
+        if not f:
+            print("Function " + str(self.function) + " not found")
+            exit(1)
+        if len(f[2]) != len(self.children):
+            print("Function %s takes %d arguments but %d was given" %
+                    (f[0], len(f[2]),len(self.children)))
+            exit(1)
+
 
 class StmtEnclose(Node):
     def prepare(self):
@@ -161,4 +223,9 @@ class Expr(Node):
         self.qualifier = self.leafs
         if self.exprs != None:
             for expr in self.exprs:
-                expr.prepare()
+                if expr != None:
+                    if type(expr) is list:
+                        for exp in expr:
+                            exp.prepare()
+                    else:
+                        expr.prepare()
