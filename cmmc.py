@@ -16,6 +16,7 @@ keywords = {
         'void'   : 'VOID',
         'char'   : 'CHAR',
         'int'    : 'INT',
+        'float'  : 'FLOAT',
 }
 
 # List of tokens
@@ -46,7 +47,7 @@ tokens = [
         'COMMENT',
         'CHARCON',
         'STRINGCON',
-        'ASSIGNMENT'
+        'ASSIGNMENT',
 ] + list(keywords.values())
 
 # Regex for simpler tokens
@@ -82,10 +83,19 @@ def t_INTCON(t):
     t.value = int(t.value)
     return t
 
+def t_INT(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+
 def t_ID(t):
     r'[a-zA-Z][a-zA-Z0-9]*'
     t.type = keywords.get(t.value, 'ID')
     return t
+
+def t_FLOAT(t):
+    r'[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?'
+    t.value = float(t.value)
 
 # Define a rule so we can track line numbers
 def t_newline(t):
@@ -139,11 +149,14 @@ def p_prog(p):
 def p_dcl_first(p): # dcl : type var_decl dcl_prime
     '''dcl : CHAR var_decl dcl_p
            | INT var_decl dcl_p
+           | FLOAT var_decl dcl_p
            | CHAR ID LPAREN param_types RPAREN dcl_p
            | INT ID LPAREN param_types RPAREN dcl_p
+           | FLOAT ID LPAREN param_types RPAREN dcl_p
            | VOID ID LPAREN param_types RPAREN dcl_p
            | EXTERN CHAR ID LPAREN param_types RPAREN dcl_p
            | EXTERN INT ID LPAREN param_types RPAREN dcl_p
+           | EXTERN FLOAT ID LPAREN param_types RPAREN dcl_p
            | EXTERN VOID ID LPAREN param_types RPAREN dcl_p'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
@@ -201,7 +214,8 @@ def p_var_decl(p):
 def p_param_types(p):
     '''param_types : VOID
                    | CHAR ID param_types_array param_types_more
-                   | INT ID param_types_array param_types_more'''
+                   | INT ID param_types_array param_types_more
+                   | FLOAT ID param_types_array param_types_more'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     if(len(p) > 2):
@@ -222,7 +236,8 @@ def p_param_types_array(p):
         p[0] = None
 def p_param_types_more(p):
     '''param_types_more : COMMA CHAR ID param_types_array param_types_more
-       param_types_more : COMMA INT ID param_types_array param_types_more
+                        | COMMA INT ID param_types_array param_types_more
+                        | COMMA FLOAT ID param_types_array param_types_more
                         |'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
@@ -238,8 +253,9 @@ def p_param_types_more(p):
 #      | void id '(' parm_types ')' '{' { type var_decl { ',' var_decl } ';' } { stmt } '}'
 def p_func(p):
     '''func : CHAR ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY
-       func : INT ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY
-       func : VOID ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
+            | INT ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY
+            | FLOAT ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY
+            | VOID ID LPAREN param_types RPAREN LCURLY func_dcl stmt_repeat RCURLY'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     func_vars = p[7] if p[7] != None else None
@@ -248,6 +264,7 @@ def p_func(p):
 def p_func_dcl(p):
     '''func_dcl : CHAR var_decl func_dcl_p SEMICOLON func_dcl
                 | INT var_decl func_dcl_p SEMICOLON func_dcl
+                | FLOAT var_decl func_dcl_p SEMICOLON func_dcl
                 |'''
     if(p != None and len(p) > 1):
         if(p[3] != None):
