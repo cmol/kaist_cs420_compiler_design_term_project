@@ -47,6 +47,7 @@ tokens = [
         'COMMENT',
         'CHARCON',
         'STRINGCON',
+        'FLOATCON',
         'ASSIGNMENT',
 ] + list(keywords.values())
 
@@ -93,7 +94,7 @@ def t_ID(t):
     t.type = keywords.get(t.value, 'ID')
     return t
 
-def t_FLOAT(t):
+def t_FLOATCON(t):
     r'[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?'
     t.value = float(t.value)
 
@@ -254,9 +255,9 @@ def p_param_types_more(p):
         print(sys._getframe().f_code.co_name)
     if(p != None and len(p) > 6):
         if(p[6] != None):
-            p[0] = [(p[3], p[2], p[4], True), *p[5]]
+            p[0] = [(p[4], p[2], p[4], True), *p[5]]
         else:
-            p[0] = [(p[3], p[2], p[4], True)]
+            p[0] = [(p[4], p[2], p[4], True)]
     elif(p != None and len(p) > 5):
         if(p[5] != None):
             p[0] = [(p[3], p[2], p[4], False), *p[5]]
@@ -397,10 +398,14 @@ def p_stmt_end(p):
 
 # assg : id [ '[' expr ']' ] = expr
 def p_assg(p):
-    '''assg : ID assg_p ASSIGNMENT expr'''
+    '''assg : ID assg_p ASSIGNMENT expr
+            | ID PLUS PLUS'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Assg('Assg', [p[4]], (p[1], p[2]) )
+    if(len(p) > 4):
+        p[0] = Assg('Assg', [p[4]], (p[1], p[2]) )
+    else:
+        p[0] = Assg('Assg-increment', None, p[1])
 def p_assg_p(p):
     '''assg_p : LSQUARE expr RSQUARE
             |'''
@@ -446,7 +451,8 @@ def p_expr_multi(p):
 def p_expr_terminals(p):
     '''expr : INTCON
             | CHARCON
-            | STRINGCON'''
+            | STRINGCON
+            | FLOATCON'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     p[0] = Expr('expr', None, p[1])
@@ -512,6 +518,8 @@ precedence = (
 parser = yacc.yacc()
 
 result = parser.parse(data, debug=0)
+if result == None:
+    exit(1)
 
 # Add printf to the function table
 funcs_global.append(("printf", "void", []))
