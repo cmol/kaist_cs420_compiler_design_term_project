@@ -1,11 +1,11 @@
 int c;
 
-int avg(int count, int value) {
+int avg(int count, int *value) {
   int i;
   int total;
   int sum;
   sum = 0;
-  for (i = 1; i < count; i = i + 1) {
+  for (i = 1; i < count; i++) {
     total = total + value[i];
   }
   return (total / count);
@@ -14,11 +14,11 @@ int avg(int count, int value) {
 int main(void) {
   int studentNumber, count, i, sum;
   int mark[4];
-  int average;
+  float average;
   count = 4;
   sum = 0;
   if(0 == 0);
-  for (i = 0; i < count; i = i + 1) {
+  for (i = 0; i < count; i++) {
     mark[i] = i * 30;
     sum = sum + mark[i];
     average = avg(i + 1, mark);
