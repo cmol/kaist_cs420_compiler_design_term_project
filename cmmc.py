@@ -215,14 +215,22 @@ def p_param_types(p):
     '''param_types : VOID
                    | CHAR ID param_types_array param_types_more
                    | INT ID param_types_array param_types_more
-                   | FLOAT ID param_types_array param_types_more'''
+                   | FLOAT ID param_types_array param_types_more
+                   | CHAR TIMES ID param_types_array param_types_more
+                   | INT TIMES ID param_types_array param_types_more
+                   | FLOAT TIMES ID param_types_array param_types_more'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    if(len(p) > 2):
-        if(p[4] != None):
-            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3]), *p[4]], None)
+    if(len(p) > 5):
+        if(p[5] != None):
+            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3], True), *p[4]], None)
         else:
-            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3])], None)
+            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3], True)], None)
+    elif(len(p) > 2):
+        if(p[4] != None):
+            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3], False), *p[4]], None)
+        else:
+            p[0] = ParamTypes('param-types', [(p[2], p[1], p[3], False)], None)
     else:
         p[0] = ParamTypes('param-types-void', None, [p[1]])
 def p_param_types_array(p):
@@ -238,14 +246,22 @@ def p_param_types_more(p):
     '''param_types_more : COMMA CHAR ID param_types_array param_types_more
                         | COMMA INT ID param_types_array param_types_more
                         | COMMA FLOAT ID param_types_array param_types_more
+                        | COMMA CHAR TIMES ID param_types_array param_types_more
+                        | COMMA INT TIMES ID param_types_array param_types_more
+                        | COMMA FLOAT TIMES ID param_types_array param_types_more
                         |'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    if(p != None and len(p) > 5):
-        if(p[5] != None):
-            p[0] = [(p[3], p[2], p[4]), *p[5]]
+    if(p != None and len(p) > 6):
+        if(p[6] != None):
+            p[0] = [(p[3], p[2], p[4], True), *p[5]]
         else:
-            p[0] = [(p[3], p[2], p[4])]
+            p[0] = [(p[3], p[2], p[4], True)]
+    elif(p != None and len(p) > 5):
+        if(p[5] != None):
+            p[0] = [(p[3], p[2], p[4], False), *p[5]]
+        else:
+            p[0] = [(p[3], p[2], p[4], False)]
     else:
         p[0] = None
 
