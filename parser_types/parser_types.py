@@ -173,6 +173,15 @@ class IfStmt(Node):
             if self.stmt_else != None:
                 self.stmt_else.prepare()
 
+    def exe(self):
+        if(self.expr.exe()):
+            if(self.stmt_if != None):
+                for stmt in self.stmt_if:
+                    stmt.exe()
+        elif(self.kind == "ifstmt-else" and self.stmt_else != None):
+            for stmt in self.stmt_if:
+                stmt.exe()
+
 class WhileStmt(Node):
     def prepare(self):
         self.expr = self.children
