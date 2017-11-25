@@ -137,6 +137,8 @@ class Func(Node):
         # Delete variable stack
         del_vars_stack()
 
+        self.build()
+
     def build(self):
         self.tree = []
         for stmt in self.func_stmts:

@@ -529,7 +529,7 @@ if result == None:
 # Add printf to the function table
 def pp(**args):
     pass
-funcs_global.append(("printf", "void", [], ))
+funcs_global.append(("printf", "void", [], pp))
 
 for node in result:
     node.prepare()
@@ -541,6 +541,4 @@ print(vars_stacks)
 
 # Start building execution tree
 main_function = find_function("main")[3]
-
-tree = main_function.build()
-tree.exe()
+main_function.exe()
