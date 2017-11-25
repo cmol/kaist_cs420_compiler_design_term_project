@@ -197,6 +197,16 @@ class ForStmt(Node):
         self.stmt       = self.children
         self.stmt.prepare()
 
+    def exe(self):
+        self.assignment.exe()
+        add_vars_stack()
+        while self.expression.exe():
+            self.operation.exe()
+            for stmt in self.stmt:
+                stmt.exe()
+        del_vars_stack()
+
+
 class ReturnStmt(Node):
     def prepare(self):
         self.stmt = self.leafs
