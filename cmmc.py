@@ -531,3 +531,8 @@ print(result)
 print(vars_global)
 print(funcs_global)
 print(vars_stacks)
+
+# Start building execution tree
+main_function = find_function("main")[3]
+
+tree = main_function.build()
