@@ -465,7 +465,12 @@ def p_expr_id(p):
     '''expr : ID expr_p'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Expr('expr-id', [p[2]], p[1])
+    if(p[2] != None and p[2][1] == "("):
+        p[0] = Expr('expr-call', [p[2][0]], p[1])
+    elif(p[2] != None):
+        p[0] = Expr('expr-arr', p[2][0], p[1])
+    else:
+        p[0] = Expr('expr-id', None, p[1])
 def p_expr_p(p):
     '''expr_p : LPAREN expr_pp RPAREN
               | LSQUARE expr RSQUARE
@@ -473,7 +478,7 @@ def p_expr_p(p):
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     if(p != None and len(p) > 1):
-        p[0] = p[2]
+        p[0] = (p[2], p[1])
     else:
         p[0] = None
 def p_expr_pp(p):

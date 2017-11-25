@@ -19,7 +19,7 @@ def del_vars_stack():
 
 def push_var(typ, var):
     if var.array:
-        vars_stacks[-1].append([var.ID, typ ,var.array, []])
+        vars_stacks[-1].append([var.ID, typ ,var.array, ["N/A"] * var.array])
     else:
         vars_stacks[-1].append([var.ID, typ ,var.array, None])
 
@@ -32,24 +32,24 @@ def find_var(vid):
             return v
     return None
 
-def assign_var(vid, value, array):
+def assign_var(vid, value, array, index=None):
     if array:
         for v in vars_stacks[-1]:
             if v[0] == vid:
-                v[2][array] = value
+                v[3][index] = value
                 return
         for v in vars_global:
             if v[0] == vid:
-                v[2][array] = value
+                v[3][index] = value
                 return
     else:
         for v in vars_stacks[-1]:
             if v[0] == vid:
-                v[2] = value
+                v[3] = value
                 return
         for v in vars_global:
             if v[0] == vid:
-                v[2] = value
+                v[3] = value
                 return
 
 def find_function(fid):
@@ -143,7 +143,7 @@ class Func(Node):
             self.tree.append(stmt.build())
         return self
 
-    def exe(self):
+    def exe(self, args=False):
         # Add stack for variables
         add_vars_stack()
         # Internal variables for the function
@@ -151,7 +151,6 @@ class Func(Node):
             for v in var[1]:
                 v.prepare()
                 push_var(var[0],v)
-        print(vars_stacks)
         ret = None
         for node in self.tree:
             print("Exec: " + str(node))
@@ -195,17 +194,17 @@ class ForStmt(Node):
         self.expression = self.leafs[1]
         self.operation  = self.leafs[2]
         self.stmt       = self.children
+        self.assignment.prepare()
+        self.expression.prepare()
+        self.operation.prepare()
         self.stmt.prepare()
 
     def exe(self):
         self.assignment.exe()
-        add_vars_stack()
-        while self.expression.exe():
+        res = self.expression.exe()
+        while res:
+            self.stmt.exe()
             self.operation.exe()
-            for stmt in self.stmt:
-                stmt.exe()
-        del_vars_stack()
-
 
 class ReturnStmt(Node):
     def prepare(self):
@@ -223,6 +222,8 @@ class Assg(Node):
         if not self.increment:
             #for assg in self.assign:
             self.assign.prepare()
+        if self.array != None:
+            self.array.prepare()
 
         # Type checking
         v = find_var(self.ID)
@@ -236,10 +237,10 @@ class Assg(Node):
     def exe(self):
         v = find_var(self.ID)
         if self.increment:
-            assign_var(self.ID, v[1] + 1, False)
+            assign_var(self.ID, v[3] + 1, False)
         else:
-            if bool(self.array):
-                assign_var(self.ID, self.assign.exe(), self.array.exe())
+            if self.array != None:
+                assign_var(self.ID, self.assign.exe(), True, self.array.exe())
             else:
                 assign_var(self.ID, self.assign.exe(), False)
 
@@ -277,11 +278,18 @@ class StmtEnclose(Node):
             else:
                 self.stmts.remove(stmt)
 
+    def exe(self):
+        for stmt in self.stmts:
+            print("Enclose: " + str(stmt))
+            stmt.exe()
+
 class Expr(Node):
     def prepare(self):
         self.exprs = self.children
         self.qualifier = self.leafs
         if self.exprs != None:
+            if type(self.exprs) is not list:
+                self.exprs = [self.exprs]
             for expr in self.exprs:
                 if expr != None:
                     if type(expr) is list:
@@ -292,10 +300,14 @@ class Expr(Node):
 
     def exe(self):
         if self.kind == "expr-con":
-            return self.exprs
+            return self.qualifier
         elif self.kind == "expr-id":
-            print("Uhh... Yeah, I'm not really sure..")
-            exit(1)
+            return find_var(self.qualifier)[3]
+        elif self.kind == "expr-call":
+            f = find_function(self.qualifier)
+            return f[3].exe(self.exprs)
+        elif self.kind == "expr-arr":
+            return find_var(self.qualifier)[3][self.exprs[0].exe()]
         elif self.kind == "expr-not":
             if self.qualifier == "-":
                 return expr.exe() * -1
