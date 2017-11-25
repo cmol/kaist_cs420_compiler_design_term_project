@@ -403,9 +403,9 @@ def p_assg(p):
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
     if(len(p) > 4):
-        p[0] = Assg('Assg', [p[4]], (p[1], p[2]) )
+        p[0] = Assg('Assg', p[4], (p[1], p[2]) )
     else:
-        p[0] = Assg('Assg-increment', None, p[1])
+        p[0] = Assg('Assg-increment', None, (p[1], None))
 def p_assg_p(p):
     '''assg_p : LSQUARE expr RSQUARE
             |'''
@@ -431,7 +431,7 @@ def p_expr_single(p):
             | NOT expr'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Expr('expr', [p[2]], p[1])
+    p[0] = Expr('expr-not', [p[2]], p[1])
 def p_expr_multi(p):
     '''expr : expr PLUS expr
             | expr MINUS expr
@@ -455,7 +455,7 @@ def p_expr_terminals(p):
             | FLOATCON'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Expr('expr', None, p[1])
+    p[0] = Expr('expr-con', None, p[1])
 def p_expr_sub(p):
     '''expr : LPAREN expr RPAREN'''
     if VERBOSE:
@@ -465,7 +465,7 @@ def p_expr_id(p):
     '''expr : ID expr_p'''
     if VERBOSE:
         print(sys._getframe().f_code.co_name)
-    p[0] = Expr('expr', [p[2]], p[1])
+    p[0] = Expr('expr-id', [p[2]], p[1])
 def p_expr_p(p):
     '''expr_p : LPAREN expr_pp RPAREN
               | LSQUARE expr RSQUARE
@@ -522,7 +522,9 @@ if result == None:
     exit(1)
 
 # Add printf to the function table
-funcs_global.append(("printf", "void", []))
+def pp(**args):
+    pass
+funcs_global.append(("printf", "void", [], ))
 
 for node in result:
     node.prepare()
@@ -536,3 +538,4 @@ print(vars_stacks)
 main_function = find_function("main")[3]
 
 tree = main_function.build()
+tree.exe()

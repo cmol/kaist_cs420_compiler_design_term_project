@@ -17,11 +17,11 @@ def add_vars_stack():
 def del_vars_stack():
     vars_stacks.pop()
 
-def push_var(var):
+def push_var(typ, var):
     if var.array:
-        vars_stacks[-1].append([var.ID, var.array, []])
+        vars_stacks[-1].append([var.ID, typ ,var.array, []])
     else:
-        vars_stacks[-1].append([var.ID, var.array, None])
+        vars_stacks[-1].append([var.ID, typ ,var.array, None])
 
 def find_var(vid):
     for v in vars_stacks[-1]:
@@ -63,6 +63,9 @@ class Node:
         self.kind = kind
         self.children = children
         self.leafs = leafs
+
+    def build(self):
+        return self
 
 class VarDecl(Node):
     def prepare(self):
@@ -119,7 +122,7 @@ class Func(Node):
         for var in self.func_vars:
             for v in var[1]:
                 v.prepare()
-                push_var(v)
+                push_var(var[0],v)
 
         # Statements for the function
         for stmt in self.func_stmts:
@@ -133,6 +136,29 @@ class Func(Node):
 
         # Delete variable stack
         del_vars_stack()
+
+    def build(self):
+        self.tree = []
+        for stmt in self.func_stmts:
+            self.tree.append(stmt.build())
+        return self
+
+    def exe(self):
+        # Add stack for variables
+        add_vars_stack()
+        # Internal variables for the function
+        for var in self.func_vars:
+            for v in var[1]:
+                v.prepare()
+                push_var(var[0],v)
+        print(vars_stacks)
+        ret = None
+        for node in self.tree:
+            print("Exec: " + str(node))
+            ret = node.exe()
+
+        del_vars_stack()
+        return ret
 
 class IfStmt(Node):
     def prepare(self):
@@ -176,18 +202,27 @@ class Assg(Node):
         self.increment = True if self.kind == "Assg-increment" else False
 
         if not self.increment:
-            for assg in self.assign:
-                assg.prepare()
+            #for assg in self.assign:
+            self.assign.prepare()
 
         # Type checking
         v = find_var(self.ID)
-        if not v or (bool(v[1]) ^ bool(self.array)):
+        if not v or (bool(v[2]) ^ bool(self.array)):
             print("Type error! Cannot find " + str(self.ID))
             print(self.array)
             print("Current var stack: ")
             print(vars_stacks[-1])
             exit(1)
 
+    def exe(self):
+        v = find_var(self.ID)
+        if self.increment:
+            assign_var(self.ID, v[1] + 1, False)
+        else:
+            if bool(self.array):
+                assign_var(self.ID, self.assign.exe(), self.array.exe())
+            else:
+                assign_var(self.ID, self.assign.exe(), False)
 
 class CallStmt(Node):
     def prepare(self):
@@ -235,3 +270,40 @@ class Expr(Node):
                             exp.prepare()
                     else:
                         expr.prepare()
+
+    def exe(self):
+        if self.kind == "expr-con":
+            return self.exprs
+        elif self.kind == "expr-id":
+            print("Uhh... Yeah, I'm not really sure..")
+            exit(1)
+        elif self.kind == "expr-not":
+            if self.qualifier == "-":
+                return expr.exe() * -1
+            else:
+                return not expr.exe()
+        elif self.qualifier == "+":
+            return self.exprs[0].exe() + self.exprs[1].exe()
+        elif self.qualifier == "-":
+            return self.exprs[0].exe() - self.exprs[1].exe()
+        elif self.qualifier == "*":
+            return self.exprs[0].exe() * self.exprs[1].exe()
+        elif self.qualifier == "/":
+            return self.exprs[0].exe() / self.exprs[1].exe()
+        elif self.qualifier == "==":
+            return self.exprs[0].exe() == self.exprs[1].exe()
+        elif self.qualifier == "!=":
+            return self.exprs[0].exe() != self.exprs[1].exe()
+        elif self.qualifier == "<=":
+            return self.exprs[0].exe() <= self.exprs[1].exe()
+        elif self.qualifier == "<":
+            return self.exprs[0].exe() < self.exprs[1].exe()
+        elif self.qualifier == ">=":
+            return self.exprs[0].exe() >= self.exprs[1].exe()
+        elif self.qualifier == ">":
+            return self.exprs[0].exe() > self.exprs[1].exe()
+        elif self.qualifier == "&&":
+            return self.exprs[0].exe() and self.exprs[1].exe()
+        elif self.qualifier == "||":
+            return self.exprs[0].exe() or self.exprs[1].exe()
+
