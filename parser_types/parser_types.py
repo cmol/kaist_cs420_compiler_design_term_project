@@ -9,7 +9,7 @@ def add_global_vars(var_type, v):
     vars_global.append([var_type,v.ID, v.array])
 
 def add_global_funcs(f):
-    funcs_global.append((f.name, f.return_type, f.param_list))
+    funcs_global.append((f.name, f.return_type, f.param_list, f))
 
 def add_vars_stack():
     vars_stacks.append([])
@@ -173,8 +173,11 @@ class Assg(Node):
         self.ID     = self.leafs[0]
         self.array  = self.leafs[1]
         self.assign = self.children
-        for assg in self.assign:
-            assg.prepare()
+        self.increment = True if self.kind == "Assg-increment" else False
+
+        if not self.increment:
+            for assg in self.assign:
+                assg.prepare()
 
         # Type checking
         v = find_var(self.ID)
