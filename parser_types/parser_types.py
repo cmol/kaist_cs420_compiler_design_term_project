@@ -211,10 +211,16 @@ class IfStmt(Node):
 
 class WhileStmt(Node):
     def prepare(self):
-        self.expr = self.children
-        self.stmt = self.leafs
+        self.expr = self.leafs
+        self.stmt = self.children
         self.expr.prepare()
         self.stmt.prepare()
+
+    def exe(self):
+        res = self.expr.exe()
+        while res:
+            self.stmt.exe()
+            res = self.expr.exe()
 
 class ForStmt(Node):
     def prepare(self):
