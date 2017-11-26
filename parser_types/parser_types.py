@@ -16,22 +16,29 @@ def add_global_vars(var_type, v):
 def add_global_funcs(f):
     funcs_global.append((f.name, f.return_type, f.param_list, f))
 
-def add_vars_stack():
+def add_function_stack():
     vars_stacks.append([])
 
-def del_vars_stack():
+def del_function_stack():
     vars_stacks.pop()
+
+def add_vars_stack():
+    vars_stacks[-1].append([])
+
+def del_vars_stack():
+    vars_stacks[-1].pop()
 
 def push_var(typ, var):
     if var.array:
-        vars_stacks[-1].append([var.ID, typ ,var.array, ["N/A"] * var.array])
+        vars_stacks[-1][-1].append([var.ID, typ ,var.array, ["N/A"] * var.array])
     else:
-        vars_stacks[-1].append([var.ID, typ ,var.array, "N/A"])
+        vars_stacks[-1][-1].append([var.ID, typ ,var.array, "N/A"])
 
 def find_var(vid):
-    for v in vars_stacks[-1]:
-        if v[0] == vid:
-            return v
+    for stacks in reversed(vars_stacks[-1]):
+        for v in stacks:
+            if v[0] == vid:
+                return v
     for v in vars_global:
         if v[0] == vid:
             return v
@@ -39,19 +46,21 @@ def find_var(vid):
 
 def assign_var(vid, value, array, index=None):
     if array:
-        for v in vars_stacks[-1]:
-            if v[0] == vid:
-                v[3][index] = value
-                return
+        for stacks in reversed(vars_stacks[-1]):
+            for v in stacks:
+                if v[0] == vid:
+                    v[3][index] = value
+                    return
         for v in vars_global:
             if v[0] == vid:
                 v[3][index] = value
                 return
     else:
-        for v in vars_stacks[-1]:
-            if v[0] == vid:
-                v[3] = value
-                return
+        for stacks in reversed(vars_stacks[-1]):
+            for v in stacks:
+                if v[0] == vid:
+                    v[3] = value
+                    return
         for v in vars_global:
             if v[0] == vid:
                 v[3] = value
@@ -120,6 +129,7 @@ class Func(Node):
         self.func_stmts  = self.children[1]
 
         # Add stack for keeping vars
+        add_function_stack()
         add_vars_stack()
 
         # Parameters
@@ -147,6 +157,7 @@ class Func(Node):
 
         # Delete variable stack
         del_vars_stack()
+        del_function_stack()
 
         self.build()
 
@@ -162,6 +173,7 @@ class Func(Node):
             args.reverse()
 
         # Add stack for variables
+        add_function_stack()
         add_vars_stack()
 
         # Find parameters and define them
@@ -185,6 +197,7 @@ class Func(Node):
             ret = ret_val.args[0]
 
         del_vars_stack()
+        del_function_stack()
         return ret
 
 class IfStmt(Node):
@@ -324,10 +337,12 @@ class StmtEnclose(Node):
                 self.stmts.remove(stmt)
 
     def exe(self):
+        add_vars_stack()
         print("All in enclose: " + str(self.stmts))
         for stmt in self.stmts:
             print("Enclose: " + str(stmt))
             stmt.exe()
+        del_vars_stack()
 
 class Expr(Node):
     def prepare(self):
