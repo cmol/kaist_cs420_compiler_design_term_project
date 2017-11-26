@@ -11,30 +11,38 @@ default = {
         }
 
 def add_global_vars(var_type, v):
+    """Add variable to global scope"""
     vars_global.append([var_type,v.ID, v.array])
 
 def add_global_funcs(f):
+    """Add function to global scope"""
     funcs_global.append((f.name, f.return_type, f.param_list, f))
 
 def add_function_stack():
+    """Add overall variable stack for within the function"""
     vars_stacks.append([])
 
 def del_function_stack():
+    """Delete the overall variable stack for within the function"""
     vars_stacks.pop()
 
 def add_vars_stack():
+    """Add a (perhaps first) sub stack to the function stack"""
     vars_stacks[-1].append([])
 
 def del_vars_stack():
+    """Delete the last substack from the function stack"""
     vars_stacks[-1].pop()
 
 def push_var(typ, var):
+    """Add a variable to the last stack"""
     if var.array:
         vars_stacks[-1][-1].append([var.ID, typ ,var.array, ["N/A"] * var.array])
     else:
         vars_stacks[-1][-1].append([var.ID, typ ,var.array, "N/A"])
 
 def find_var(vid):
+    """Find a variable in the reverse function stacks or in the global stack"""
     for stacks in reversed(vars_stacks[-1]):
         for v in stacks:
             if v[0] == vid:
@@ -45,6 +53,7 @@ def find_var(vid):
     return None
 
 def assign_var(vid, value, array, index=None):
+    """Set variable in the reverse function stack or on the global stack"""
     if array:
         for stacks in reversed(vars_stacks[-1]):
             for v in stacks:
@@ -67,6 +76,7 @@ def assign_var(vid, value, array, index=None):
                 return
 
 def find_function(fid):
+    """Find function in the function table"""
     for f in funcs_global:
         if f[0] == fid:
             return f
@@ -76,6 +86,7 @@ def find_function(fid):
 class FunctionReturn(Exception):
     pass
 
+# The node defines a general node structure that all later nodes inharits from.
 class Node:
     def __init__(self,kind,children=None,leafs=None,lineno=0):
         self.kind     = kind
@@ -160,6 +171,7 @@ class Func(Node):
         del_vars_stack()
         del_function_stack()
 
+        # Prepare self for execution
         self.build()
 
     def build(self):
