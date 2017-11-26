@@ -1,3 +1,5 @@
+import copy
+
 global funcs_global
 global vars_stacks
 global vars_global
@@ -8,7 +10,7 @@ funcs_global = []
 vars_stacks  = []
 vars_global  = []
 vars_history = {}
-current_func = []
+current_func = ["main"]
 default = {
         "int" : 0,
         "float" : 0.0,
@@ -23,7 +25,7 @@ def execute():
 
     while exeline == 0:
         # Read user input
-        inp = input("> > ").split()
+        inp = input(">["+ current_func[-1]+"]> ").split()
 
         # Run lines of program
         if inp[0] == "next":
@@ -89,9 +91,10 @@ def push_var(typ, var):
     # Keep history of variables
     if (var.ID, current_func[-1]) in vars_history:
         # Variable is already defined, so we'll push and reset
-        vars_history[var.ID,current_func[-1]].append((value, var.lineno))
+        vars_history[var.ID,current_func[-1]].append((copy.copy(value),
+            var.lineno))
     else:
-        vars_history[var.ID,current_func[-1]] = [(value,var.lineno)]
+        vars_history[var.ID,current_func[-1]] = [(copy.copy(value),var.lineno)]
 
 def find_var(vid):
     """Find a variable in the reverse function stacks or in the global stack"""
@@ -111,24 +114,28 @@ def assign_var(vid, value, array, index, lineno):
             for v in stacks:
                 if v[0] == vid:
                     v[3][index] = value
-                    vars_history[vid ,current_func[-1]].append((v[3], lineno))
+                    vars_history[vid,current_func[-1]].append((copy.copy(v[3]),
+                        lineno))
                     return
         for v in vars_global:
             if v[0] == vid:
                 v[3][index] = value
-                vars_history[vid ,current_func[-1]].append((v[3], lineno))
+                vars_history[vid ,current_func[-1]].append((copy.copy(v[3]),
+                    lineno))
                 return
     else:
         for stacks in reversed(vars_stacks[-1]):
             for v in stacks:
                 if v[0] == vid:
                     v[3] = value
-                    vars_history[vid ,current_func[-1]].append((v[3], lineno))
+                    vars_history[vid,current_func[-1]].append((copy.copy(v[3]),
+                        lineno))
                     return
         for v in vars_global:
             if v[0] == vid:
                 v[3] = value
-                vars_history[vid ,current_func[-1]].append((v[3], lineno))
+                vars_history[vid ,current_func[-1]].append((copy.copy(v[3]),
+                    lineno))
                 return
 
 def find_function(fid):

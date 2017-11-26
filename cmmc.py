@@ -489,3 +489,7 @@ for node in result:
 # Start building execution tree
 main_function = find_function("main")[3]
 main_function.exe([2])
+
+print("End for file reached")
+while(True):
+    execute()
