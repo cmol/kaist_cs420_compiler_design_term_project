@@ -31,8 +31,6 @@ def push_var(typ, var):
 def find_var(vid):
     for v in vars_stacks[-1]:
         if v[0] == vid:
-            if v[3] == "N/A":
-                v[3] = default[v[1]]
             return v
     for v in vars_global:
         if v[0] == vid:
@@ -350,7 +348,8 @@ class Expr(Node):
         if self.kind == "expr-con":
             return self.qualifier
         elif self.kind == "expr-id":
-            return find_var(self.qualifier)[3]
+            var = find_var(self.qualifier)
+            return var[3] if var[3] != "N/A" else default[var[1]]
         elif self.kind == "expr-call":
             args = []
             for exp in self.exprs[0]:
