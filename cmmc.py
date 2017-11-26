@@ -187,7 +187,6 @@ def p_dcl_pp(p):
     ''' dcl_pp : COMMA ID LPAREN param_types RPAREN dcl_pp
                |'''
     if(p != None and len(p) > 1):
-        print(len(p))
         if(p[6] != None):
             p[0] = [(p[2], p[4]), *p[6]]
         else:
@@ -489,4 +488,4 @@ for node in result:
 
 # Start building execution tree
 main_function = find_function("main")[3]
-main_function.exe()
+main_function.exe([2])

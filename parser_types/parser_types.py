@@ -1,10 +1,14 @@
 global funcs_global
 global vars_stacks
 global vars_global
+global vars_history
 global exeline
+global current_func
 funcs_global = []
 vars_stacks  = []
 vars_global  = []
+vars_history = {}
+current_func = []
 default = {
         "int" : 0,
         "float" : 0.0,
@@ -16,6 +20,7 @@ exeline = 0
 
 def execute():
     global exeline
+
     while exeline == 0:
         # Read user input
         inp = input("> > ").split()
@@ -34,8 +39,18 @@ def execute():
                 print("Variable is not defined! :-(")
             else:
                 print(v[3])
+        # Quit the execution
         elif inp[0] == "quit":
             exit(0)
+        # Trace variables
+        elif inp[0] == "trace":
+            vid = inp[1]
+            if (vid, current_func[-1]) in vars_history:
+                for entry in vars_history[vid, current_func[-1]]:
+                    print("%s = %s at line %d" % (vid, entry[0], entry[1]))
+            else:
+                print("Variable is not defined in function %s! :-(" %
+                        current_func[-1])
 
     exeline = exeline - 1
 
@@ -66,9 +81,17 @@ def del_vars_stack():
 def push_var(typ, var):
     """Add a variable to the last stack"""
     if var.array:
-        vars_stacks[-1][-1].append([var.ID, typ ,var.array, ["N/A"] * var.array])
+        value = ["N/A"] * var.array
     else:
-        vars_stacks[-1][-1].append([var.ID, typ ,var.array, "N/A"])
+        value = "N/A"
+    vars_stacks[-1][-1].append([var.ID, typ ,var.array, value])
+
+    # Keep history of variables
+    if (var.ID, current_func[-1]) in vars_history:
+        # Variable is already defined, so we'll push and reset
+        vars_history[var.ID,current_func[-1]].append((value, var.lineno))
+    else:
+        vars_history[var.ID,current_func[-1]] = [(value,var.lineno)]
 
 def find_var(vid):
     """Find a variable in the reverse function stacks or in the global stack"""
@@ -81,27 +104,31 @@ def find_var(vid):
             return v
     return None
 
-def assign_var(vid, value, array, index=None):
+def assign_var(vid, value, array, index, lineno):
     """Set variable in the reverse function stack or on the global stack"""
     if array:
         for stacks in reversed(vars_stacks[-1]):
             for v in stacks:
                 if v[0] == vid:
                     v[3][index] = value
+                    vars_history[vid ,current_func[-1]].append((v[3], lineno))
                     return
         for v in vars_global:
             if v[0] == vid:
                 v[3][index] = value
+                vars_history[vid ,current_func[-1]].append((v[3], lineno))
                 return
     else:
         for stacks in reversed(vars_stacks[-1]):
             for v in stacks:
                 if v[0] == vid:
                     v[3] = value
+                    vars_history[vid ,current_func[-1]].append((v[3], lineno))
                     return
         for v in vars_global:
             if v[0] == vid:
                 v[3] = value
+                vars_history[vid ,current_func[-1]].append((v[3], lineno))
                 return
 
 def find_function(fid):
@@ -168,10 +195,15 @@ class Func(Node):
         self.parameters  = self.leafs[2]
         self.func_vars   = self.children[0]
         self.func_stmts  = self.children[1]
+        self.first_main  = True
 
         # Add stack for keeping vars
         add_function_stack()
         add_vars_stack()
+        current_func.append(self.name)
+
+        # Steal line number from parameters
+        self.lineno = self.parameters.lineno
 
         # Parameters
         self.param_list = []
@@ -199,6 +231,7 @@ class Func(Node):
         # Delete variable stack
         del_vars_stack()
         del_function_stack()
+        current_func.pop()
 
         # Prepare self for execution
         self.build()
@@ -210,6 +243,12 @@ class Func(Node):
         return self
 
     def exe(self, args=False):
+        global vars_history
+        # Reset on first main invocation
+        if self.name == "main" and self.first_main:
+            vars_history = {}
+            self.first_main = False
+
         # Check if we should execute
         execute()
 
@@ -220,13 +259,14 @@ class Func(Node):
         # Add stack for variables
         add_function_stack()
         add_vars_stack()
+        current_func.append(self.name)
 
         # Find parameters and define them
         for var in self.param_list:
-            v = VarDecl("", None, (var[0],var[3]))
+            v = VarDecl("", None, (var[0],var[3]), self.lineno)
             v.prepare()
             push_var(var[1], v)
-            assign_var(v.ID, args.pop(), False)
+            assign_var(v.ID, args.pop(), False, None, self.lineno)
 
         # Internal variables for the function
         for var in self.func_vars:
@@ -238,13 +278,14 @@ class Func(Node):
         ret = None
         try:
             for node in self.tree:
-                print("Exec: " + str(node))
+                #print("Exec: " + str(node))
                 ret = node.exe()
         except FunctionReturn as ret_val:
             ret = ret_val.args[0]
 
         del_vars_stack()
         del_function_stack()
+        current_func.pop()
         return ret
 
 class IfStmt(Node):
@@ -348,12 +389,13 @@ class Assg(Node):
         execute()
         v = find_var(self.ID)
         if self.increment:
-            assign_var(self.ID, v[3] + 1, False)
+            assign_var(self.ID, v[3] + 1, False, None, self.lineno)
         else:
             if self.array != None:
-                assign_var(self.ID, self.assign.exe(), True, self.array.exe())
+                assign_var(self.ID, self.assign.exe(), True, self.array.exe(),
+                        self.lineno)
             else:
-                assign_var(self.ID, self.assign.exe(), False)
+                assign_var(self.ID, self.assign.exe(), False, None,self.lineno)
 
 class CallStmt(Node):
     def prepare(self):
@@ -399,9 +441,9 @@ class StmtEnclose(Node):
 
     def exe(self):
         add_vars_stack()
-        print("All in enclose: " + str(self.stmts))
+        #print("All in enclose: " + str(self.stmts))
         for stmt in self.stmts:
-            print("Enclose: " + str(stmt))
+            #print("Enclose: " + str(stmt))
             stmt.exe()
         del_vars_stack()
 
