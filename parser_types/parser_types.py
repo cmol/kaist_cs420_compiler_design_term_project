@@ -4,6 +4,11 @@ global vars_global
 funcs_global = []
 vars_stacks  = []
 vars_global  = []
+default = {
+        "int" : 0,
+        "float" : 0.0,
+        "char" : ''
+        }
 
 def add_global_vars(var_type, v):
     vars_global.append([var_type,v.ID, v.array])
@@ -21,11 +26,13 @@ def push_var(typ, var):
     if var.array:
         vars_stacks[-1].append([var.ID, typ ,var.array, ["N/A"] * var.array])
     else:
-        vars_stacks[-1].append([var.ID, typ ,var.array, None])
+        vars_stacks[-1].append([var.ID, typ ,var.array, "N/A"])
 
-def find_var(vid):
+def find_var(vid, array=False, index=False):
     for v in vars_stacks[-1]:
         if v[0] == vid:
+            if v[3] == "N/A":
+                v[3] = default[v[1]]
             return v
     for v in vars_global:
         if v[0] == vid:
@@ -57,6 +64,10 @@ def find_function(fid):
         if f[0] == fid:
             return f
     return None
+
+# Define class for function return
+class FunctionReturn(Exception):
+    pass
 
 class Node:
     def __init__(self,kind,children=None,leafs=None):
@@ -93,7 +104,6 @@ class Dcl(Node):
                 add_global_vars(self.type, var)
 
 class ParamTypes(Node):
-    params = []
     def prepare(self):
         if self.kind == "param-types-void":
             self.params = [None]
@@ -146,17 +156,32 @@ class Func(Node):
         return self
 
     def exe(self, args=False):
+        # Prepare args
+        if args:
+            args.reverse()
+
         # Add stack for variables
         add_vars_stack()
+
+        # Find parameters and define them
+        for var in self.param_list:
+            v = VarDecl("", None, (var[0],var[3]))
+            v.prepare()
+            push_var(var[1], v)
+            assign_var(v.ID, args.pop(), False)
+
         # Internal variables for the function
         for var in self.func_vars:
             for v in var[1]:
                 v.prepare()
                 push_var(var[0],v)
         ret = None
-        for node in self.tree:
-            print("Exec: " + str(node))
-            ret = node.exe()
+        try:
+            for node in self.tree:
+                print("Exec: " + str(node))
+                ret = node.exe()
+        except FunctionReturn as ret_val:
+            ret = ret_val.args[0]
 
         del_vars_stack()
         return ret
@@ -213,6 +238,12 @@ class ReturnStmt(Node):
         self.stmt = self.leafs
         if self.stmt != None:
             self.stmt.prepare()
+
+    def exe(self):
+        if self.stmt != None:
+            raise FunctionReturn(self.stmt.exe())
+        else:
+            raise FunctionReturn(None)
 
 class Assg(Node):
     def prepare(self):
@@ -306,8 +337,11 @@ class Expr(Node):
         elif self.kind == "expr-id":
             return find_var(self.qualifier)[3]
         elif self.kind == "expr-call":
+            args = []
+            for exp in self.exprs[0]:
+                args.append(exp.exe())
             f = find_function(self.qualifier)
-            return f[3].exe(self.exprs)
+            return f[3].exe(args)
         elif self.kind == "expr-arr":
             return find_var(self.qualifier)[3][self.exprs[0].exe()]
         elif self.kind == "expr-not":

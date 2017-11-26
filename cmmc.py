@@ -534,10 +534,10 @@ funcs_global.append(("printf", "void", [], pp))
 for node in result:
     node.prepare()
 
-print(result)
-print(vars_global)
-print(funcs_global)
-print(vars_stacks)
+#print(result)
+#print(vars_global)
+#print(funcs_global)
+#print(vars_stacks)
 
 # Start building execution tree
 main_function = find_function("main")[3]
