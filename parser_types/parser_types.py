@@ -1,6 +1,7 @@
 global funcs_global
 global vars_stacks
 global vars_global
+global exeline
 funcs_global = []
 vars_stacks  = []
 vars_global  = []
@@ -9,6 +10,24 @@ default = {
         "float" : 0.0,
         "char" : ''
         }
+
+# Var to keep track of the lines executed from start
+exeline = 0
+
+def execute():
+    global exeline
+    while exeline == 0:
+        # Read user input
+        inp = input("> > ").split()
+
+        # Run lines of program
+        if inp[0] == "next":
+            if len(inp) > 1:
+                exeline = int(inp[1])
+            else:
+                exeline = 1
+
+    exeline = exeline - 1
 
 def add_global_vars(var_type, v):
     """Add variable to global scope"""
@@ -181,6 +200,9 @@ class Func(Node):
         return self
 
     def exe(self, args=False):
+        # Check if we should execute
+        execute()
+
         # Prepare args
         if args:
             args.reverse()
@@ -198,6 +220,8 @@ class Func(Node):
 
         # Internal variables for the function
         for var in self.func_vars:
+            # Check if we should execute
+            execute()
             for v in var[1]:
                 v.prepare()
                 push_var(var[0],v)
@@ -229,8 +253,12 @@ class IfStmt(Node):
     def exe(self):
         if(self.expr.exe()):
             if(self.stmt_if != None):
+                # Check if we should execute
+                execute()
                 self.stmt_if.exe()
         elif(self.kind == "ifstmt-else" and self.stmt_else != None):
+            # Check if we should execute
+            execute()
             self.stmt_else.exe()
 
 class WhileStmt(Node):
@@ -243,6 +271,8 @@ class WhileStmt(Node):
     def exe(self):
         res = self.expr.exe()
         while res:
+            # Check if we should execute
+            execute()
             self.stmt.exe()
             res = self.expr.exe()
 
@@ -261,6 +291,8 @@ class ForStmt(Node):
         self.assignment.exe()
         res = self.expression.exe()
         while res:
+            # Check if we should execute
+            execute()
             self.stmt.exe()
             self.operation.exe()
             res = self.expression.exe()
@@ -272,6 +304,8 @@ class ReturnStmt(Node):
             self.stmt.prepare()
 
     def exe(self):
+        # Check if we should execute
+        execute()
         if self.stmt != None:
             raise FunctionReturn(self.stmt.exe())
         else:
@@ -300,6 +334,8 @@ class Assg(Node):
             exit(1)
 
     def exe(self):
+        # Check if we should execute
+        execute()
         v = find_var(self.ID)
         if self.increment:
             assign_var(self.ID, v[3] + 1, False)
@@ -334,6 +370,8 @@ class CallStmt(Node):
             exit(1)
 
     def exe(self, *args):
+        # Check if we should execute
+        execute()
         args = []
         for exp in self.expr:
             args.append(exp.exe())
