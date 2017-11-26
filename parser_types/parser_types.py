@@ -77,10 +77,11 @@ class FunctionReturn(Exception):
     pass
 
 class Node:
-    def __init__(self,kind,children=None,leafs=None):
-        self.kind = kind
+    def __init__(self,kind,children=None,leafs=None,lineno=0):
+        self.kind     = kind
         self.children = children
-        self.leafs = leafs
+        self.leafs    = leafs
+        self.lineno   = lineno
 
     def __str__(self):
         return self.kind
