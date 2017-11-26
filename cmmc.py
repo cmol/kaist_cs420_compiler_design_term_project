@@ -530,6 +530,7 @@ if result == None:
 class pp():
     def exe(*args):
         string, *args = args
+        string = string[1:-1]
         print(string % tuple(args))
 funcs_global.append(("printf", "void", [], pp))
 
