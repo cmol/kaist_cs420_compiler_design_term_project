@@ -27,6 +27,16 @@ def execute():
             else:
                 exeline = 1
 
+        # Print variable from current function scope or global scope
+        elif inp[0] == "print":
+            v = find_var(inp[1])
+            if v == None:
+                print("Variable is not defined! :-(")
+            else:
+                print(v[3])
+        elif inp[0] == "quit":
+            exit(0)
+
     exeline = exeline - 1
 
 def add_global_vars(var_type, v):
