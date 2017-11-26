@@ -4,4 +4,4 @@
 - Implement repl
 - Fix variable scope and implement rest of scope
 - Look at default variable value checks
-
+- Find out what is up with the print function
