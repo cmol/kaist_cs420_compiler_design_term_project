@@ -527,8 +527,10 @@ if result == None:
     exit(1)
 
 # Add printf to the function table
-def pp(**args):
-    pass
+class pp():
+    def exe(*args):
+        string, *args = args
+        print(string % tuple(args))
 funcs_global.append(("printf", "void", [], pp))
 
 for node in result:

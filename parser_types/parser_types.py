@@ -28,7 +28,7 @@ def push_var(typ, var):
     else:
         vars_stacks[-1].append([var.ID, typ ,var.array, "N/A"])
 
-def find_var(vid, array=False, index=False):
+def find_var(vid):
     for v in vars_stacks[-1]:
         if v[0] == vid:
             if v[3] == "N/A":
@@ -74,6 +74,9 @@ class Node:
         self.kind = kind
         self.children = children
         self.leafs = leafs
+
+    def __str__(self):
+        return self.kind
 
     def build(self):
         return self
@@ -202,11 +205,9 @@ class IfStmt(Node):
     def exe(self):
         if(self.expr.exe()):
             if(self.stmt_if != None):
-                for stmt in self.stmt_if:
-                    stmt.exe()
+                self.stmt_if.exe()
         elif(self.kind == "ifstmt-else" and self.stmt_else != None):
-            for stmt in self.stmt_if:
-                stmt.exe()
+            self.stmt_else.exe()
 
 class WhileStmt(Node):
     def prepare(self):
@@ -232,6 +233,7 @@ class ForStmt(Node):
         while res:
             self.stmt.exe()
             self.operation.exe()
+            res = self.expression.exe()
 
 class ReturnStmt(Node):
     def prepare(self):
@@ -301,6 +303,12 @@ class CallStmt(Node):
                     (f[0], len(f[2]),len(self.children)))
             exit(1)
 
+    def exe(self, *args):
+        args = []
+        for exp in self.expr:
+            args.append(exp.exe())
+        f = find_function(self.function)
+        f[3].exe(*args)
 
 class StmtEnclose(Node):
     def prepare(self):
@@ -312,6 +320,7 @@ class StmtEnclose(Node):
                 self.stmts.remove(stmt)
 
     def exe(self):
+        print("All in enclose: " + str(self.stmts))
         for stmt in self.stmts:
             print("Enclose: " + str(stmt))
             stmt.exe()
@@ -343,7 +352,12 @@ class Expr(Node):
             f = find_function(self.qualifier)
             return f[3].exe(args)
         elif self.kind == "expr-arr":
-            return find_var(self.qualifier)[3][self.exprs[0].exe()]
+            var = find_var(self.qualifier)
+            index = self.exprs[0].exe()
+            if var[3][index] != "N/A":
+                return var[3][index]
+            else:
+                return default[var[1]]
         elif self.kind == "expr-not":
             if self.qualifier == "-":
                 return expr.exe() * -1
