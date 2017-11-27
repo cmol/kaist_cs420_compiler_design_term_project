@@ -10,7 +10,7 @@ funcs_global = []
 vars_stacks  = []
 vars_global  = []
 vars_history = {}
-current_func = ["main"]
+current_func = []
 default = {
         "int" : 0,
         "float" : 0.0,
@@ -46,18 +46,18 @@ def execute():
                 try:
                     exeline = int(inp[1])
                 except:
-                    print("Argument must be an integer")
+                    print("Incorrect command usage : try ‘next [lines]’")
             else:
                 exeline = 1
 
         # Print variable from current function scope or global scope
         elif inp[0] == "print":
             if len(inp) < 2:
-                print("Missing argument")
+                print("Incorrect command usage : try ‘print [variable]’")
                 continue
             v = find_var(inp[1])
             if v == None:
-                print("Variable is not defined! :-(")
+                print("Invisible variable")
             else:
                 print(v[3])
         # Quit the execution
@@ -66,19 +66,18 @@ def execute():
         # Trace variables
         elif inp[0] == "trace":
             if len(inp) < 2:
-                print("Missing argument")
+                print("Incorrect command usage : try ‘trace [variable]’")
                 continue
             vid = inp[1]
             if (vid, current_func[-1]) in vars_history:
                 for entry in vars_history[vid, current_func[-1]]:
                     print("%s = %s at line %d" % (vid, entry[0], entry[1]))
             else:
-                print("Variable is not defined in function %s! :-(" %
-                        current_func[-1])
+                print("Invisible variable")
         elif inp[0] == "help":
             print_help()
         else:
-            print("Unrecognised command: %s" & inp[0])
+            print("Unrecognised command: %s" % (inp[0]))
 
     exeline = exeline - 1
 
@@ -288,20 +287,19 @@ class Func(Node):
             vars_history = {}
             self.first_main = False
 
+        current_func.append(self.name)
         # Check if we should execute
         execute()
 
         # Prepare args
         if type(args) is not list:
             args = [args]
-        print(args)
         if args:
             args.reverse()
 
         # Add stack for variables
         add_function_stack()
         add_vars_stack()
-        current_func.append(self.name)
 
         # Find parameters and define them
         for var in self.param_list:
@@ -325,9 +323,12 @@ class Func(Node):
         except FunctionReturn as ret_val:
             ret = ret_val.args[0]
 
-        del_vars_stack()
-        del_function_stack()
-        current_func.pop()
+        # Keep context of main for debugger
+        if self.name != "main":
+            del_vars_stack()
+            del_function_stack()
+            current_func.pop()
+
         return ret
 
 class IfStmt(Node):

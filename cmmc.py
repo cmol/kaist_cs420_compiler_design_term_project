@@ -495,6 +495,6 @@ print_help()
 main_function = find_function("main")[3]
 main_function.exe([2])
 
-print("End for file reached")
+print("End of Program")
 while(True):
     execute()
