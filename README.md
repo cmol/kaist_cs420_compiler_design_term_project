@@ -27,7 +27,12 @@ This will lex and parse the file, and if no syntax errors exists, drop the user 
 
     >[main]>
 
-The prompt describes the current function and lets the user input a command from the list above.
+The prompt describes the current function. The user can run commands from the list above by entering them into the terminal and pressing enter.
+
+### Details of usage
+
+- As a piece of code comes to its end, the context and variable stacks of the main function are kept for inspection using the debugger.
+- When searching a variable using print, the current scope, including all parent scopes within the same function are searched for the variable. The first hit will return the searched variable. If the function scopes does not have a reference to the variable, the global scope is searched for the variable.
 
 ## Testing
 The code has been tested with the provided c source file, as well as a small simpler c source file. Both these are included within this project.
