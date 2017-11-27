@@ -246,17 +246,23 @@ class Func(Node):
                 self.param_list.append(param)
 
         # Internal variables for the function
-        for var in self.func_vars:
-            for v in var[1]:
-                v.prepare()
-                push_var(var[0],v)
+        if self.func_vars != None:
+            for var in self.func_vars:
+                for v in var[1]:
+                    v.prepare()
+                    push_var(var[0],v)
+        else:
+            self.func_vars = []
 
         # Statements for the function
-        for stmt in self.func_stmts:
-            if stmt != None:
-                stmt.prepare()
-            else:
-                self.func_stmts.remove(stmt)
+        if self.func_stmts:
+            for stmt in self.func_stmts:
+                if stmt != None:
+                    stmt.prepare()
+                else:
+                    self.func_stmts.remove(stmt)
+        else:
+            self.func_stmts = []
 
         # Add function to table
         add_global_funcs(self)
@@ -286,6 +292,9 @@ class Func(Node):
         execute()
 
         # Prepare args
+        if type(args) is not list:
+            args = [args]
+        print(args)
         if args:
             args.reverse()
 
