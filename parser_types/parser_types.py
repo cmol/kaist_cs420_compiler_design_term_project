@@ -17,6 +17,12 @@ default = {
         "char" : ''
         }
 
+def print_help():
+    print(
+        "Commands:\n\tnext\n\tnext [x]" +
+        "\n\tprint [variable]\n\ttrace [variable]\n\tquit (CTRL+D)"+
+        "\n\thelp")
+
 # Var to keep track of the lines executed from start
 exeline = 0
 
@@ -25,17 +31,30 @@ def execute():
 
     while exeline == 0:
         # Read user input
-        inp = input(">["+ current_func[-1]+"]> ").split()
+        try:
+            inp = input(">["+ current_func[-1]+"]> ").split()
+            # Check for empty input
+            if len(inp) < 1:
+                continue
+        # Let user exit with CTRL+D
+        except EOFError:
+            exit(0)
 
         # Run lines of program
         if inp[0] == "next":
             if len(inp) > 1:
-                exeline = int(inp[1])
+                try:
+                    exeline = int(inp[1])
+                except:
+                    print("Argument must be an integer")
             else:
                 exeline = 1
 
         # Print variable from current function scope or global scope
         elif inp[0] == "print":
+            if len(inp) < 2:
+                print("Missing argument")
+                continue
             v = find_var(inp[1])
             if v == None:
                 print("Variable is not defined! :-(")
@@ -46,6 +65,9 @@ def execute():
             exit(0)
         # Trace variables
         elif inp[0] == "trace":
+            if len(inp) < 2:
+                print("Missing argument")
+                continue
             vid = inp[1]
             if (vid, current_func[-1]) in vars_history:
                 for entry in vars_history[vid, current_func[-1]]:
@@ -53,6 +75,10 @@ def execute():
             else:
                 print("Variable is not defined in function %s! :-(" %
                         current_func[-1])
+        elif inp[0] == "help":
+            print_help()
+        else:
+            print("Unrecognised command: %s" & inp[0])
 
     exeline = exeline - 1
 

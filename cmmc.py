@@ -3,6 +3,10 @@ import ply.lex as lex
 from parser_types import *
 import sys
 
+if len(sys.argv) < 2:
+    print("Usage: %s [c source file]" % sys.argv[0])
+    exit(1)
+
 VERBOSE = False
 
 # List of keywords
@@ -115,7 +119,7 @@ def t_error(t):
 #### Build the lexer
 lexer = lex.lex()
 # Give the lexer some input
-with open ("test.c", "r") as myfile:
+with open (sys.argv[1], "r") as myfile:
     data=myfile.read()
 #lexer.input(data)
 
@@ -486,6 +490,7 @@ for node in result:
 #print(funcs_global)
 #print(vars_stacks)
 
+print_help()
 # Start building execution tree
 main_function = find_function("main")[3]
 main_function.exe([2])
