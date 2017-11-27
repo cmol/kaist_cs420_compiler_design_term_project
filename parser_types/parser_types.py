@@ -4,13 +4,16 @@ global funcs_global
 global vars_stacks
 global vars_global
 global vars_history
+global vars_global_history
 global exeline
 global current_func
 funcs_global = []
 vars_stacks  = []
 vars_global  = []
 vars_history = {}
+vars_global_history = {}
 current_func = []
+
 default = {
         "int" : 0,
         "float" : 0.0,
@@ -72,6 +75,9 @@ def execute():
             if (vid, current_func[-1]) in vars_history:
                 for entry in vars_history[vid, current_func[-1]]:
                     print("%s = %s at line %d" % (vid, entry[0], entry[1]))
+            elif (vid, "GLOBAL") in vars_global_history:
+                for entry in vars_global_history[vid, "GLOBAL"]:
+                    print("%s = %s at line %d" % (vid, entry[0], entry[1]))
             else:
                 print("Invisible variable")
         elif inp[0] == "help":
@@ -83,7 +89,12 @@ def execute():
 
 def add_global_vars(var_type, v):
     """Add variable to global scope"""
-    vars_global.append([var_type,v.ID, v.array])
+    if v.array:
+        value = ["N/A"] * v.array
+    else:
+        value = "N/A"
+    vars_global.append([v.ID, var_type, v.array, "N/A"])
+    vars_global_history[v.ID,"GLOBAL"] = [(copy.copy(value),v.lineno)]
 
 def add_global_funcs(f):
     """Add function to global scope"""
@@ -145,7 +156,7 @@ def assign_var(vid, value, array, index, lineno):
         for v in vars_global:
             if v[0] == vid:
                 v[3][index] = value
-                vars_history[vid ,current_func[-1]].append((copy.copy(v[3]),
+                vars_global_history[vid ,"GLOBAL"].append((copy.copy(v[3]),
                     lineno))
                 return
     else:
@@ -159,7 +170,8 @@ def assign_var(vid, value, array, index, lineno):
         for v in vars_global:
             if v[0] == vid:
                 v[3] = value
-                vars_history[vid ,current_func[-1]].append((copy.copy(v[3]),
+                print(vars_history)
+                vars_global_history[vid ,"GLOBAL"].append((copy.copy(v[3]),
                     lineno))
                 return
 
@@ -425,6 +437,8 @@ class Assg(Node):
             print(self.array)
             print("Current var stack: ")
             print(vars_stacks[-1])
+            print("Current global stack: ")
+            print(vars_global)
             exit(1)
 
     def exe(self):
