@@ -30,7 +30,7 @@
   </p>
   <p>
    <strong>
-    PYTHON VERSIONS LOWER THAN PYTHON3 IS NOT SUPPORTED!
+    PYTHON VERSIONS LOWER THAN PYTHON3 ARE NOT SUPPORTED!
    </strong>
   </p>
   <h2 id="usage">
@@ -69,7 +69,19 @@
     As a piece of code comes to its end, the context and variable stacks of the main function are kept for inspection using the debugger.
    </li>
    <li>
-    When searching a variable using print, the current scope, including all parent scopes within the same function are searched for the variable. The first hit will return the searched variable. If the function scopes does not have a reference to the variable, the global scope is searched for the variable.
+    When searching a variable using
+    <code>
+     print
+    </code>
+    , the current scope, including all parent scopes within the same function are searched for the variable. The first hit will return the searched variable. If the function scopes does not have a reference to the variable, the
+    <em>
+     global scope
+    </em>
+    is searched for the variable. The same goes for the
+    <code>
+     trace
+    </code>
+    function.
    </li>
   </ul>
   <h2 id="testing">

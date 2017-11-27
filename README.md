@@ -8,7 +8,7 @@ The parser uses the python ply module. On Ubuntu, this is found in the packet:
 
 , which leads to the next requirement:
 
-**PYTHON VERSIONS LOWER THAN PYTHON3 IS NOT SUPPORTED!**
+**PYTHON VERSIONS LOWER THAN PYTHON3 ARE NOT SUPPORTED!**
 
 ## Usage
 The compiler is run using the `cmmc.py` file as:
@@ -32,7 +32,7 @@ The prompt describes the current function. The user can run commands from the li
 ### Details of usage
 
 - As a piece of code comes to its end, the context and variable stacks of the main function are kept for inspection using the debugger.
-- When searching a variable using print, the current scope, including all parent scopes within the same function are searched for the variable. The first hit will return the searched variable. If the function scopes does not have a reference to the variable, the global scope is searched for the variable.
+- When searching a variable using `print`, the current scope, including all parent scopes within the same function are searched for the variable. The first hit will return the searched variable. If the function scopes does not have a reference to the variable, the *global scope* is searched for the variable. The same goes for the `trace` function.
 
 ## Testing
 The code has been tested with the provided c source file, as well as a small simpler c source file. Both these are included within this project.
