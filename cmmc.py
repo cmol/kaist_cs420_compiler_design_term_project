@@ -480,10 +480,8 @@ precedence = (
         ('right', 'UMINUS', 'NOT'),
     )
 
-# Globals
-
 # Build the parser
-parser = yacc.yacc()
+parser = yacc.yacc(errorlog=yacc.NullLogger())
 
 result = parser.parse(data, debug=0)
 if result == None:
@@ -499,11 +497,6 @@ funcs_global.append(("printf", "void", [], pp))
 
 for node in result:
     node.prepare()
-
-#print(result)
-#print(vars_global)
-#print(funcs_global)
-#print(vars_stacks)
 
 print_help()
 # Start building execution tree
