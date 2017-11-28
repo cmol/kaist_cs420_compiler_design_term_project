@@ -48,7 +48,6 @@ tokens = [
         'MORE',
         'AND',
         'OR',
-        'COMMENT',
         'CHARCON',
         'STRINGCON',
         'FLOATCON',
@@ -77,7 +76,6 @@ t_MOREEQUAL  = r'>='
 t_MORE       = r'>'
 t_AND        = r'&&'
 t_OR         = r'\|\|'
-t_COMMENT    = r'\/\*(\w|\W)*\*\/'
 t_CHARCON    = r'\'([ -~] | \n | \0)\''
 t_STRINGCON  = r'\"([ -~] | \0)*\"'
 t_ASSIGNMENT = r'='
@@ -101,6 +99,10 @@ def t_FLOATCON(t):
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
+
+def t_comment(t):
+    r'(/\*(.|\n)*?\*/)|(//.*)'
+    t.lineno += t.value.count('\n')
 
 # A string containing ignored characters (spaces and tabs)
 t_ignore  = ' \t'
