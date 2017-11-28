@@ -39,8 +39,8 @@ def execute():
             # Check for empty input
             if len(inp) < 1:
                 continue
-        # Let user exit with CTRL+D
-        except EOFError:
+        # Let user exit with CTRL+D / CTRL+C
+        except (EOFError, KeyboardInterrupt):
             exit(0)
 
         # Run lines of program
