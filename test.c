@@ -10,6 +10,8 @@ int avg(int count, int *value) {
   return (total / count);
 }
 
+// comment
+
 int main(int test) {
   int studentNumber, count, i, sum;
   int mark[4];
