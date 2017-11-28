@@ -543,6 +543,21 @@ class Expr(Node):
                 return expr.exe() * -1
             else:
                 return not expr.exe()
+        elif self.kind == "expr-var-pre":
+            var = find_var(self.qualifier[0])
+            if self.qualifier[1] == "+":
+                assign_var(var[0], var[3] + 1, False, False, self.lineno)
+                return var[3] + 1
+            else:
+                assign_var(var[0], var[3] - 1, False, False, self.lineno)
+                return var[3] - 1
+        elif self.kind == "expr-var-post":
+            if self.qualifier[1] == "+":
+                assign_var(var[0], var[3] + 1, False, False, self.lineno)
+                return var[3]
+            else:
+                assign_var(var[0], var[3] - 1, False, False, self.lineno)
+                return var[3]
         elif self.qualifier == "+":
             return self.exprs[0].exe() + self.exprs[1].exe()
         elif self.qualifier == "-":

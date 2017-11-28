@@ -408,6 +408,20 @@ def p_expr_multi(p):
             | expr AND expr
             | expr OR expr'''
     p[0] = Expr('expr', [p[1], p[3]], p[2], p.lexer.lineno)
+def p_expr_var_ops(p):
+    '''expr : ID PLUS PLUS
+            | ID MINUS MINUS
+            | PLUS PLUS ID'''
+    if(p[2] == "+"):
+        if(p[1] == "+"):
+            p[0] = Expr('expr-var-pre', None, (p[3], "+"))
+        else:
+            p[0] = Expr('expr-var-post', None, (p[1], "+"))
+    else:
+        if(p[1] == "-"):
+            p[0] = Expr('expr-var-pre', None, (p[3], "-"))
+        else:
+            p[0] = Expr('expr-var-post', None, (p[1], "-"))
 def p_expr_terminals(p):
     '''expr : INTCON
             | CHARCON
