@@ -16,10 +16,12 @@ int main(int test) {
   int studentNumber, count, i, sum;
   int mark[4];
   float average;
+  studentNumber = 0;
   count = 4;
   sum = 0;
   if(0 == 0);
   for (i = 0; i < count; i++) {
+    --studentNumber;
     mark[i] = i * 30;
     sum = sum + mark[i];
     average = avg(i + 1, mark);

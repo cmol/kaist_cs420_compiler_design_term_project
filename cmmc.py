@@ -364,11 +364,21 @@ def p_stmt_end(p):
 # assg : id [ '[' expr ']' ] = expr
 def p_assg(p):
     '''assg : ID assg_p ASSIGNMENT expr
-            | ID PLUS PLUS'''
+            | ID PLUS PLUS
+            | PLUS PLUS ID
+            | ID MINUS MINUS
+            | MINUS MINUS ID'''
     if(len(p) > 4):
         p[0] = Assg('Assg', p[4], (p[1], p[2]) , p.lexer.lineno)
     else:
-        p[0] = Assg('Assg-increment', None, (p[1], None), p.lexer.lineno)
+        if(p[3] == "+"):
+            p[0] = Assg('Assg-increment', None, (p[1], None), p.lexer.lineno)
+        elif(p[3] == "-"):
+            p[0] = Assg('Assg-decrement', None, (p[1], None), p.lexer.lineno)
+        elif(p[1] == "+"):
+            p[0] = Assg('Assg-increment', None, (p[3], None), p.lexer.lineno)
+        elif(p[1] == "-"):
+            p[0] = Assg('Assg-decrement', None, (p[3], None), p.lexer.lineno)
 def p_assg_p(p):
     '''assg_p : LSQUARE expr RSQUARE
             |'''

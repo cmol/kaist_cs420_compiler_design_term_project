@@ -426,8 +426,9 @@ class Assg(Node):
         self.array  = self.leafs[1]
         self.assign = self.children
         self.increment = True if self.kind == "Assg-increment" else False
+        self.decrement = True if self.kind == "Assg-decrement" else False
 
-        if not self.increment:
+        if not self.increment and not self.decrement:
             #for assg in self.assign:
             self.assign.prepare()
         if self.array != None:
@@ -450,6 +451,8 @@ class Assg(Node):
         v = find_var(self.ID)
         if self.increment:
             assign_var(self.ID, v[3] + 1, False, None, self.lineno)
+        elif self.decrement:
+            assign_var(self.ID, v[3] - 1, False, None, self.lineno)
         else:
             if self.array != None:
                 assign_var(self.ID, self.assign.exe(), True, self.array.exe(),
