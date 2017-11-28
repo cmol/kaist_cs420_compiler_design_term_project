@@ -118,14 +118,6 @@ lexer = lex.lex()
 # Give the lexer some input
 with open (sys.argv[1], "r") as myfile:
     data=myfile.read()
-#lexer.input(data)
-
-# Tokenize
-#while True:
-#    tok = lexer.token()
-#    if not tok:
-#        break      # No more input
-#    print(tok)
 
 # Start the parsing
 import ply.yacc as yacc
