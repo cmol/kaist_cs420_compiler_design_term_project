@@ -333,7 +333,6 @@ class Func(Node):
         ret = None
         try:
             for node in self.tree:
-                #print("Exec: " + str(node))
                 ret = node.exe()
         except FunctionReturn as ret_val:
             ret = ret_val.args[0]
@@ -504,9 +503,7 @@ class StmtEnclose(Node):
 
     def exe(self):
         add_vars_stack()
-        #print("All in enclose: " + str(self.stmts))
         for stmt in self.stmts:
-            #print("Enclose: " + str(stmt))
             stmt.exe()
         del_vars_stack()
 
