@@ -9,5 +9,6 @@
 - [OK] Implicit cast between int and float (both ways)
 - [OK-ish] ++a and a++. So --a has not been implemented as it fucks up
   the grammar..
+- [OK] Report syntax errors when they happen and die there.
 - Print memory address when an array without index is printed
 - Print normal strings from char arrays
