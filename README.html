@@ -66,7 +66,11 @@
   </h3>
   <ul>
    <li>
-    As a piece of code comes to its end, the context and variable stacks of the main function are kept for inspection using the debugger.
+    As a piece of code comes to its end, the context and variable stacks of the
+    <code>
+     main
+    </code>
+    function are kept for inspection using the debugger.
    </li>
    <li>
     When searching a variable using
@@ -90,6 +94,20 @@
   <p>
    The code has been tested with the provided c source file, as well as a small simpler c source file. Both these are included within this project.
   </p>
+  <h2 id="additional-features">
+   Additional features
+  </h2>
+  <p>
+   Additional features implemented are:
+  </p>
+  <ul>
+   <li>
+    <strong>
+     Global variables
+    </strong>
+    - It is not only possible to have access to local variables in the scopes within the function, but also to a global variable table. Variables accessed here are treated the same way as if they existed in the local scope.
+   </li>
+  </ul>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js">
   </script>
   <script>

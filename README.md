@@ -31,8 +31,13 @@ The prompt describes the current function. The user can run commands from the li
 
 ### Details of usage
 
-- As a piece of code comes to its end, the context and variable stacks of the main function are kept for inspection using the debugger.
+- As a piece of code comes to its end, the context and variable stacks of the `main` function are kept for inspection using the debugger.
 - When searching a variable using `print`, the current scope, including all parent scopes within the same function are searched for the variable. The first hit will return the searched variable. If the function scopes does not have a reference to the variable, the *global scope* is searched for the variable. The same goes for the `trace` function.
 
 ## Testing
 The code has been tested with the provided c source file, as well as a small simpler c source file. Both these are included within this project.
+
+## Additional features
+Additional features implemented are:
+
+- **Global variables** - It is not only possible to have access to local variables in the scopes within the function, but also to a global variable table. Variables accessed here are treated the same way as if they existed in the local scope.
