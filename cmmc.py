@@ -468,6 +468,10 @@ def p_expr_ppp(p):
     else:
         p[0] = None
 
+def p_error(p):
+    print("Syntax error : line %d" % (p.lexer.lineno))
+    exit(1)
+
 # Define precedence
 precedence = (
         ('left', 'OR'),
