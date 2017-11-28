@@ -88,11 +88,6 @@ def t_INTCON(t):
     t.value = int(t.value)
     return t
 
-def t_INT(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
-
 def t_ID(t):
     r'[a-zA-Z][a-zA-Z0-9]*'
     t.type = keywords.get(t.value, 'ID')
