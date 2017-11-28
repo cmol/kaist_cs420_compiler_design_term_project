@@ -145,6 +145,9 @@ def find_var(vid):
 
 def assign_var(vid, value, array, index, lineno):
     """Set variable in the reverse function stack or on the global stack"""
+    tempv = find_var(vid)
+    if tempv[2] == "int":
+        value = int(value)
     if array:
         for stacks in reversed(vars_stacks[-1]):
             for v in stacks:
