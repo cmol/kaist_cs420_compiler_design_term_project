@@ -16,6 +16,8 @@ int main(int test) {
   int studentNumber, count, i, sum;
   int mark[4];
   float average;
+  int cc[5];
+  printf("%s", cc);
   studentNumber = 0;
   count = 4;
   sum = 0;

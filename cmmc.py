@@ -476,7 +476,7 @@ def p_expr_ppp(p):
         p[0] = None
 
 def p_error(p):
-    print("Syntax error : line %d" % (p.lexer.lineno))
+    print("Syntax error : line %d" % (p.lineno))
     exit(1)
 
 # Define precedence
@@ -498,12 +498,26 @@ if result == None:
     exit(1)
 
 # Add printf to the function table
-class pp():
+class PythonPrint():
     def exe(*args):
         string, *args = args
         string = string[1:-1]
+        for i,arg in enumerate(args):
+            if type(arg) is list:
+                is_str = True
+                for c in arg:
+                    if type(c) is not str:
+                        is_str = False
+                        break
+                if is_str:
+                    str_out = ""
+                    for c in arg:
+                        str_out = str_out + (c[1:-1] if c != "N/A" else "N/A")
+                    args[i] = str_out
+                else:
+                    args[i] = "MemID: " + str(id(arg))
         print(string % tuple(args))
-funcs_global.append(("printf", "void", [], pp))
+funcs_global.append(("printf", "void", [], PythonPrint))
 
 for node in result:
     node.prepare()
